@@ -1,0 +1,475 @@
+Docker Installation:
+
+[root@worker2 ~]# vi /etc/hosts
+[worker@worker2 ~]$ cat /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.29.10 manager
+192.168.29.11 worker1
+192.168.29.12 worker2
+
+[root@worker2 ~]# ip r
+default via 192.168.29.1 dev ens33 proto static metric 100
+192.168.29.0/24 dev ens33 proto kernel scope link src 192.168.29.12 metric 100
+[root@worker2 ~]# yum install -y yum-utils device-mapper-persistent-data lvm2
+Loaded plugins: fastestmirror
+Determining fastest mirrors
+ * base: mirrors.piconets.webwerks.in
+ * extras: mirrors.piconets.webwerks.in
+ * updates: mirrors.piconets.webwerks.in
+base                                                                                               | 3.6 kB  00:00:00
+extras                                                                                             | 2.9 kB  00:00:00
+updates                                                                                            | 2.9 kB  00:00:00
+(1/4): base/7/x86_64/group_gz                                                                      | 165 kB  00:00:00
+(2/4): extras/7/x86_64/primary_db                                                                  | 153 kB  00:00:00
+(3/4): updates/7/x86_64/primary_db                                                                 | 4.2 MB  00:00:01
+(4/4): base/7/x86_64/primary_db                                                                    | 6.0 MB  00:00:07
+Package device-mapper-persistent-data-0.8.5-1.el7.x86_64 already installed and latest version
+Resolving Dependencies
+--> Running transaction check
+---> Package lvm2.x86_64 7:2.02.185-2.el7 will be updated
+---> Package lvm2.x86_64 7:2.02.185-2.el7_7.2 will be an update
+--> Processing Dependency: lvm2-libs = 7:2.02.185-2.el7_7.2 for package: 7:lvm2-2.02.185-2.el7_7.2.x86_64
+---> Package yum-utils.noarch 0:1.1.31-52.el7 will be installed
+--> Processing Dependency: python-kitchen for package: yum-utils-1.1.31-52.el7.noarch
+--> Processing Dependency: libxml2-python for package: yum-utils-1.1.31-52.el7.noarch
+--> Running transaction check
+---> Package libxml2-python.x86_64 0:2.9.1-6.el7_2.3 will be installed
+---> Package lvm2-libs.x86_64 7:2.02.185-2.el7 will be updated
+---> Package lvm2-libs.x86_64 7:2.02.185-2.el7_7.2 will be an update
+--> Processing Dependency: device-mapper-event = 7:1.02.158-2.el7_7.2 for package: 7:lvm2-libs-2.02.185-2.el7_7.2.x86_64
+---> Package python-kitchen.noarch 0:1.1.1-5.el7 will be installed
+--> Processing Dependency: python-chardet for package: python-kitchen-1.1.1-5.el7.noarch
+--> Running transaction check
+---> Package device-mapper-event.x86_64 7:1.02.158-2.el7 will be updated
+---> Package device-mapper-event.x86_64 7:1.02.158-2.el7_7.2 will be an update
+--> Processing Dependency: device-mapper-event-libs = 7:1.02.158-2.el7_7.2 for package: 7:device-mapper-event-1.02.158-2.el7_7.2.x86_64
+--> Processing Dependency: device-mapper = 7:1.02.158-2.el7_7.2 for package: 7:device-mapper-event-1.02.158-2.el7_7.2.x86_64
+---> Package python-chardet.noarch 0:2.2.1-3.el7 will be installed
+--> Running transaction check
+---> Package device-mapper.x86_64 7:1.02.158-2.el7 will be updated
+--> Processing Dependency: device-mapper = 7:1.02.158-2.el7 for package: 7:device-mapper-libs-1.02.158-2.el7.x86_64
+---> Package device-mapper.x86_64 7:1.02.158-2.el7_7.2 will be an update
+---> Package device-mapper-event-libs.x86_64 7:1.02.158-2.el7 will be updated
+---> Package device-mapper-event-libs.x86_64 7:1.02.158-2.el7_7.2 will be an update
+--> Running transaction check
+---> Package device-mapper-libs.x86_64 7:1.02.158-2.el7 will be updated
+---> Package device-mapper-libs.x86_64 7:1.02.158-2.el7_7.2 will be an update
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+==========================================================================================================================
+ Package                               Arch                Version                             Repository            Size
+==========================================================================================================================
+Installing:
+ yum-utils                             noarch              1.1.31-52.el7                       base                 121 k
+Updating:
+ lvm2                                  x86_64              7:2.02.185-2.el7_7.2                updates              1.3 M
+Installing for dependencies:
+ libxml2-python                        x86_64              2.9.1-6.el7_2.3                     base                 247 k
+ python-chardet                        noarch              2.2.1-3.el7                         base                 227 k
+ python-kitchen                        noarch              1.1.1-5.el7                         base                 267 k
+Updating for dependencies:
+ device-mapper                         x86_64              7:1.02.158-2.el7_7.2                updates              294 k
+ device-mapper-event                   x86_64              7:1.02.158-2.el7_7.2                updates              190 k
+ device-mapper-event-libs              x86_64              7:1.02.158-2.el7_7.2                updates              189 k
+ device-mapper-libs                    x86_64              7:1.02.158-2.el7_7.2                updates              322 k
+ lvm2-libs                             x86_64              7:2.02.185-2.el7_7.2                updates              1.1 M
+
+Transaction Summary
+==========================================================================================================================
+Install  1 Package (+3 Dependent packages)
+Upgrade  1 Package (+5 Dependent packages)
+
+Total download size: 4.2 M
+Downloading packages:
+Delta RPMs disabled because /usr/bin/applydeltarpm not installed.
+warning: /var/cache/yum/x86_64/7/updates/packages/device-mapper-event-1.02.158-2.el7_7.2.x86_64.rpm: Header V3 RSA/SHA256 Signature, key ID f4a80eb5: NOKEY
+Public key for device-mapper-event-1.02.158-2.el7_7.2.x86_64.rpm is not installed
+(1/10): device-mapper-event-1.02.158-2.el7_7.2.x86_64.rpm                                          | 190 kB  00:00:00
+(2/10): device-mapper-1.02.158-2.el7_7.2.x86_64.rpm                                                | 294 kB  00:00:00
+(3/10): device-mapper-event-libs-1.02.158-2.el7_7.2.x86_64.rpm                                     | 189 kB  00:00:00
+(4/10): device-mapper-libs-1.02.158-2.el7_7.2.x86_64.rpm                                           | 322 kB  00:00:00
+Public key for libxml2-python-2.9.1-6.el7_2.3.x86_64.rpm is not installed               ]  0.0 B/s | 1.4 MB  --:--:-- ETA
+(5/10): libxml2-python-2.9.1-6.el7_2.3.x86_64.rpm                                                  | 247 kB  00:00:00
+(6/10): python-kitchen-1.1.1-5.el7.noarch.rpm                                                      | 267 kB  00:00:00
+(7/10): python-chardet-2.2.1-3.el7.noarch.rpm                                                      | 227 kB  00:00:00
+(8/10): lvm2-2.02.185-2.el7_7.2.x86_64.rpm                                                         | 1.3 MB  00:00:00
+(9/10): yum-utils-1.1.31-52.el7.noarch.rpm                                                         | 121 kB  00:00:00
+(10/10): lvm2-libs-2.02.185-2.el7_7.2.x86_64.rpm                                                   | 1.1 MB  00:00:00
+--------------------------------------------------------------------------------------------------------------------------
+Total                                                                                     2.8 MB/s | 4.2 MB  00:00:01
+Retrieving key from file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+Importing GPG key 0xF4A80EB5:
+ Userid     : "CentOS-7 Key (CentOS 7 Official Signing Key) <security@centos.org>"
+ Fingerprint: 6341 ab27 53d7 8a78 a7c2 7bb1 24c6 a8a7 f4a8 0eb5
+ Package    : centos-release-7-7.1908.0.el7.centos.x86_64 (@anaconda)
+ From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Updating   : 7:device-mapper-1.02.158-2.el7_7.2.x86_64                                                             1/16
+  Updating   : 7:device-mapper-libs-1.02.158-2.el7_7.2.x86_64                                                        2/16
+  Updating   : 7:device-mapper-event-libs-1.02.158-2.el7_7.2.x86_64                                                  3/16
+  Updating   : 7:device-mapper-event-1.02.158-2.el7_7.2.x86_64                                                       4/16
+  Updating   : 7:lvm2-libs-2.02.185-2.el7_7.2.x86_64                                                                 5/16
+  Installing : libxml2-python-2.9.1-6.el7_2.3.x86_64                                                                 6/16
+  Installing : python-chardet-2.2.1-3.el7.noarch                                                                     7/16
+  Installing : python-kitchen-1.1.1-5.el7.noarch                                                                     8/16
+  Installing : yum-utils-1.1.31-52.el7.noarch                                                                        9/16
+  Updating   : 7:lvm2-2.02.185-2.el7_7.2.x86_64                                                                     10/16
+  Cleanup    : 7:lvm2-2.02.185-2.el7.x86_64                                                                         11/16
+  Cleanup    : 7:lvm2-libs-2.02.185-2.el7.x86_64                                                                    12/16
+  Cleanup    : 7:device-mapper-event-1.02.158-2.el7.x86_64                                                          13/16
+  Cleanup    : 7:device-mapper-event-libs-1.02.158-2.el7.x86_64                                                     14/16
+  Cleanup    : 7:device-mapper-1.02.158-2.el7.x86_64                                                                15/16
+  Cleanup    : 7:device-mapper-libs-1.02.158-2.el7.x86_64                                                           16/16
+  Verifying  : 7:device-mapper-event-libs-1.02.158-2.el7_7.2.x86_64                                                  1/16
+  Verifying  : python-chardet-2.2.1-3.el7.noarch                                                                     2/16
+  Verifying  : yum-utils-1.1.31-52.el7.noarch                                                                        3/16
+  Verifying  : 7:device-mapper-libs-1.02.158-2.el7_7.2.x86_64                                                        4/16
+  Verifying  : 7:lvm2-2.02.185-2.el7_7.2.x86_64                                                                      5/16
+  Verifying  : libxml2-python-2.9.1-6.el7_2.3.x86_64                                                                 6/16
+  Verifying  : 7:lvm2-libs-2.02.185-2.el7_7.2.x86_64                                                                 7/16
+  Verifying  : python-kitchen-1.1.1-5.el7.noarch                                                                     8/16
+  Verifying  : 7:device-mapper-event-1.02.158-2.el7_7.2.x86_64                                                       9/16
+  Verifying  : 7:device-mapper-1.02.158-2.el7_7.2.x86_64                                                            10/16
+  Verifying  : 7:device-mapper-event-1.02.158-2.el7.x86_64                                                          11/16
+  Verifying  : 7:device-mapper-event-libs-1.02.158-2.el7.x86_64                                                     12/16
+  Verifying  : 7:device-mapper-1.02.158-2.el7.x86_64                                                                13/16
+  Verifying  : 7:device-mapper-libs-1.02.158-2.el7.x86_64                                                           14/16
+  Verifying  : 7:lvm2-libs-2.02.185-2.el7.x86_64                                                                    15/16
+  Verifying  : 7:lvm2-2.02.185-2.el7.x86_64                                                                         16/16
+
+Installed:
+  yum-utils.noarch 0:1.1.31-52.el7
+
+Dependency Installed:
+  libxml2-python.x86_64 0:2.9.1-6.el7_2.3    python-chardet.noarch 0:2.2.1-3.el7    python-kitchen.noarch 0:1.1.1-5.el7
+
+Updated:
+  lvm2.x86_64 7:2.02.185-2.el7_7.2
+
+Dependency Updated:
+  device-mapper.x86_64 7:1.02.158-2.el7_7.2                      device-mapper-event.x86_64 7:1.02.158-2.el7_7.2
+  device-mapper-event-libs.x86_64 7:1.02.158-2.el7_7.2           device-mapper-libs.x86_64 7:1.02.158-2.el7_7.2
+  lvm2-libs.x86_64 7:2.02.185-2.el7_7.2
+
+Complete!
+[root@worker2 ~]# yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+Loaded plugins: fastestmirror
+adding repo from: https://download.docker.com/linux/centos/docker-ce.repo
+grabbing file https://download.docker.com/linux/centos/docker-ce.repo to /etc/yum.repos.d/docker-ce.repo
+repo saved to /etc/yum.repos.d/docker-ce.repo
+[root@worker2 ~]# yum install wget
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirrors.piconets.webwerks.in
+ * extras: mirrors.piconets.webwerks.in
+ * updates: mirrors.piconets.webwerks.in
+docker-ce-stable                                                                                   | 3.5 kB  00:00:00
+(1/2): docker-ce-stable/x86_64/updateinfo                                                          |   55 B  00:00:00
+(2/2): docker-ce-stable/x86_64/primary_db                                                          |  37 kB  00:00:00
+Resolving Dependencies
+--> Running transaction check
+---> Package wget.x86_64 0:1.14-18.el7_6.1 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+==========================================================================================================================
+ Package                  Arch                       Version                               Repository                Size
+==========================================================================================================================
+Installing:
+ wget                     x86_64                     1.14-18.el7_6.1                       base                     547 k
+
+Transaction Summary
+==========================================================================================================================
+Install  1 Package
+
+Total download size: 547 k
+Installed size: 2.0 M
+Is this ok [y/d/N]: y
+Downloading packages:
+wget-1.14-18.el7_6.1.x86_64.rpm                                                                    | 547 kB  00:00:00
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : wget-1.14-18.el7_6.1.x86_64                                                                            1/1
+  Verifying  : wget-1.14-18.el7_6.1.x86_64                                                                            1/1
+
+Installed:
+  wget.x86_64 0:1.14-18.el7_6.1
+
+Complete!
+[root@worker2 ~]# ping download.docker.com
+PING d2h67oheeuigaw.cloudfront.net (13.227.143.89) 56(84) bytes of data.
+64 bytes from server-13-227-143-89.bom50.r.cloudfront.net (13.227.143.89): icmp_seq=1 ttl=242 time=37.3 ms
+64 bytes from server-13-227-143-89.bom50.r.cloudfront.net (13.227.143.89): icmp_seq=2 ttl=242 time=37.8 ms
+^C
+--- d2h67oheeuigaw.cloudfront.net ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1003ms
+rtt min/avg/max/mdev = 37.399/37.619/37.839/0.220 ms
+[root@worker2 ~]# cat /etc/resolv.conf
+# Generated by NetworkManager
+nameserver 8.8.8.8
+nameserver 2405:201:1804:3ff3::c0a8:1d01
+[root@worker2 ~]# yum -y install docker-ce docker-ce-cli containerd.io
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirrors.piconets.webwerks.in
+ * extras: mirrors.piconets.webwerks.in
+ * updates: mirrors.piconets.webwerks.in
+Resolving Dependencies
+--> Running transaction check
+---> Package containerd.io.x86_64 0:1.2.10-3.2.el7 will be installed
+--> Processing Dependency: container-selinux >= 2:2.74 for package: containerd.io-1.2.10-3.2.el7.x86_64
+---> Package docker-ce.x86_64 3:19.03.5-3.el7 will be installed
+--> Processing Dependency: libcgroup for package: 3:docker-ce-19.03.5-3.el7.x86_64
+---> Package docker-ce-cli.x86_64 1:19.03.5-3.el7 will be installed
+--> Running transaction check
+---> Package container-selinux.noarch 2:2.107-3.el7 will be installed
+--> Processing Dependency: policycoreutils-python for package: 2:container-selinux-2.107-3.el7.noarch
+---> Package libcgroup.x86_64 0:0.41-21.el7 will be installed
+--> Running transaction check
+---> Package policycoreutils-python.x86_64 0:2.5-33.el7 will be installed
+--> Processing Dependency: setools-libs >= 3.3.8-4 for package: policycoreutils-python-2.5-33.el7.x86_64
+--> Processing Dependency: libsemanage-python >= 2.5-14 for package: policycoreutils-python-2.5-33.el7.x86_64
+--> Processing Dependency: audit-libs-python >= 2.1.3-4 for package: policycoreutils-python-2.5-33.el7.x86_64
+--> Processing Dependency: python-IPy for package: policycoreutils-python-2.5-33.el7.x86_64
+--> Processing Dependency: libqpol.so.1(VERS_1.4)(64bit) for package: policycoreutils-python-2.5-33.el7.x86_64
+--> Processing Dependency: libqpol.so.1(VERS_1.2)(64bit) for package: policycoreutils-python-2.5-33.el7.x86_64
+--> Processing Dependency: libapol.so.4(VERS_4.0)(64bit) for package: policycoreutils-python-2.5-33.el7.x86_64
+--> Processing Dependency: checkpolicy for package: policycoreutils-python-2.5-33.el7.x86_64
+--> Processing Dependency: libqpol.so.1()(64bit) for package: policycoreutils-python-2.5-33.el7.x86_64
+--> Processing Dependency: libapol.so.4()(64bit) for package: policycoreutils-python-2.5-33.el7.x86_64
+--> Running transaction check
+---> Package audit-libs-python.x86_64 0:2.8.5-4.el7 will be installed
+---> Package checkpolicy.x86_64 0:2.5-8.el7 will be installed
+---> Package libsemanage-python.x86_64 0:2.5-14.el7 will be installed
+---> Package python-IPy.noarch 0:0.75-6.el7 will be installed
+---> Package setools-libs.x86_64 0:3.3.8-4.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+==========================================================================================================================
+ Package                             Arch                Version                      Repository                     Size
+==========================================================================================================================
+Installing:
+ containerd.io                       x86_64              1.2.10-3.2.el7               docker-ce-stable               23 M
+ docker-ce                           x86_64              3:19.03.5-3.el7              docker-ce-stable               24 M
+ docker-ce-cli                       x86_64              1:19.03.5-3.el7              docker-ce-stable               39 M
+Installing for dependencies:
+ audit-libs-python                   x86_64              2.8.5-4.el7                  base                           76 k
+ checkpolicy                         x86_64              2.5-8.el7                    base                          295 k
+ container-selinux                   noarch              2:2.107-3.el7                extras                         39 k
+ libcgroup                           x86_64              0.41-21.el7                  base                           66 k
+ libsemanage-python                  x86_64              2.5-14.el7                   base                          113 k
+ policycoreutils-python              x86_64              2.5-33.el7                   base                          457 k
+ python-IPy                          noarch              0.75-6.el7                   base                           32 k
+ setools-libs                        x86_64              3.3.8-4.el7                  base                          620 k
+
+Transaction Summary
+==========================================================================================================================
+Install  3 Packages (+8 Dependent packages)
+
+Total download size: 89 M
+Installed size: 368 M
+Downloading packages:
+(1/11): audit-libs-python-2.8.5-4.el7.x86_64.rpm                                                   |  76 kB  00:00:00
+(2/11): container-selinux-2.107-3.el7.noarch.rpm                                                   |  39 kB  00:00:00
+(3/11): checkpolicy-2.5-8.el7.x86_64.rpm                                                           | 295 kB  00:00:01
+warning: /var/cache/yum/x86_64/7/docker-ce-stable/packages/containerd.io-1.2.10-3.2.el7.x86_64.rpm: Header V4 RSA/SHA512 Signature, key ID 621e9f35: NOKEY
+Public key for containerd.io-1.2.10-3.2.el7.x86_64.rpm is not installed
+(4/11): containerd.io-1.2.10-3.2.el7.x86_64.rpm                                                    |  23 MB  00:00:24
+(5/11): libcgroup-0.41-21.el7.x86_64.rpm                                                           |  66 kB  00:00:00
+(6/11): python-IPy-0.75-6.el7.noarch.rpm                                                           |  32 kB  00:00:00
+(7/11): libsemanage-python-2.5-14.el7.x86_64.rpm                                                   | 113 kB  00:00:00
+(8/11): setools-libs-3.3.8-4.el7.x86_64.rpm                                                        | 620 kB  00:00:00
+(9/11): policycoreutils-python-2.5-33.el7.x86_64.rpm                                               | 457 kB  00:00:03
+(10/11): docker-ce-19.03.5-3.el7.x86_64.rpm                                                        |  24 MB  00:00:34
+(11/11): docker-ce-cli-19.03.5-3.el7.x86_64.rpm                                                    |  39 MB  00:00:17
+--------------------------------------------------------------------------------------------------------------------------
+Total                                                                                     2.1 MB/s |  89 MB  00:00:42
+Retrieving key from https://download.docker.com/linux/centos/gpg
+Importing GPG key 0x621E9F35:
+ Userid     : "Docker Release (CE rpm) <docker@docker.com>"
+ Fingerprint: 060a 61c5 1b55 8a7f 742b 77aa c52f eb6b 621e 9f35
+ From       : https://download.docker.com/linux/centos/gpg
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : libcgroup-0.41-21.el7.x86_64                                                                          1/11
+  Installing : setools-libs-3.3.8-4.el7.x86_64                                                                       2/11
+  Installing : 1:docker-ce-cli-19.03.5-3.el7.x86_64                                                                  3/11
+  Installing : audit-libs-python-2.8.5-4.el7.x86_64                                                                  4/11
+  Installing : python-IPy-0.75-6.el7.noarch                                                                          5/11
+  Installing : libsemanage-python-2.5-14.el7.x86_64                                                                  6/11
+  Installing : checkpolicy-2.5-8.el7.x86_64                                                                          7/11
+  Installing : policycoreutils-python-2.5-33.el7.x86_64                                                              8/11
+  Installing : 2:container-selinux-2.107-3.el7.noarch                                                                9/11
+  Installing : containerd.io-1.2.10-3.2.el7.x86_64                                                                  10/11
+  Installing : 3:docker-ce-19.03.5-3.el7.x86_64                                                                     11/11
+  Verifying  : checkpolicy-2.5-8.el7.x86_64                                                                          1/11
+  Verifying  : policycoreutils-python-2.5-33.el7.x86_64                                                              2/11
+  Verifying  : 3:docker-ce-19.03.5-3.el7.x86_64                                                                      3/11
+  Verifying  : libsemanage-python-2.5-14.el7.x86_64                                                                  4/11
+  Verifying  : 2:container-selinux-2.107-3.el7.noarch                                                                5/11
+  Verifying  : python-IPy-0.75-6.el7.noarch                                                                          6/11
+  Verifying  : audit-libs-python-2.8.5-4.el7.x86_64                                                                  7/11
+  Verifying  : containerd.io-1.2.10-3.2.el7.x86_64                                                                   8/11
+  Verifying  : 1:docker-ce-cli-19.03.5-3.el7.x86_64                                                                  9/11
+  Verifying  : setools-libs-3.3.8-4.el7.x86_64                                                                      10/11
+  Verifying  : libcgroup-0.41-21.el7.x86_64                                                                         11/11
+
+Installed:
+  containerd.io.x86_64 0:1.2.10-3.2.el7     docker-ce.x86_64 3:19.03.5-3.el7     docker-ce-cli.x86_64 1:19.03.5-3.el7
+
+Dependency Installed:
+  audit-libs-python.x86_64 0:2.8.5-4.el7                    checkpolicy.x86_64 0:2.5-8.el7
+  container-selinux.noarch 2:2.107-3.el7                    libcgroup.x86_64 0:0.41-21.el7
+  libsemanage-python.x86_64 0:2.5-14.el7                    policycoreutils-python.x86_64 0:2.5-33.el7
+  python-IPy.noarch 0:0.75-6.el7                            setools-libs.x86_64 0:3.3.8-4.el7
+
+Complete!
+[root@worker2 ~]# useradd -c 'docker worker user' worker
+[root@worker2 ~]# passwd worker
+Changing password for user worker.
+New password:
+BAD PASSWORD: The password is shorter than 8 characters
+Retype new password:
+passwd: all authentication tokens updated successfully.
+[root@worker2 ~]# ip r
+default via 192.168.29.1 dev ens33 proto static metric 100
+192.168.29.0/24 dev ens33 proto kernel scope link src 192.168.29.12 metric 100
+[root@worker2 ~]# yum install -y yum-utils device-mapper-persistent-data lvm2
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirrors.piconets.webwerks.in
+ * extras: mirrors.piconets.webwerks.in
+ * updates: mirrors.piconets.webwerks.in
+Package yum-utils-1.1.31-52.el7.noarch already installed and latest version
+Package device-mapper-persistent-data-0.8.5-1.el7.x86_64 already installed and latest version
+Package 7:lvm2-2.02.185-2.el7_7.2.x86_64 already installed and latest version
+Nothing to do
+[root@worker2 ~]# yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+Loaded plugins: fastestmirror
+adding repo from: https://download.docker.com/linux/centos/docker-ce.repo
+grabbing file https://download.docker.com/linux/centos/docker-ce.repo to /etc/yum.repos.d/docker-ce.repo
+repo saved to /etc/yum.repos.d/docker-ce.repo
+[root@worker2 ~]# yum install wget
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirrors.piconets.webwerks.in
+ * extras: mirrors.piconets.webwerks.in
+ * updates: mirrors.piconets.webwerks.in
+Package wget-1.14-18.el7_6.1.x86_64 already installed and latest version
+Nothing to do
+[root@worker2 ~]# ping download.docker.com
+PING d2h67oheeuigaw.cloudfront.net (13.227.143.70) 56(84) bytes of data.
+64 bytes from server-13-227-143-70.bom50.r.cloudfront.net (13.227.143.70): icmp_seq=1 ttl=242 time=42.2 ms
+^C
+--- d2h67oheeuigaw.cloudfront.net ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 42.238/42.238/42.238/0.000 ms
+[root@worker2 ~]# cat /etc/resolv.conf
+# Generated by NetworkManager
+nameserver 8.8.8.8
+nameserver 2405:201:1804:3ff3::c0a8:1d01
+[root@worker2 ~]# yum install docker-ce docker-ce-cli containerd.io
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: mirrors.piconets.webwerks.in
+ * extras: mirrors.piconets.webwerks.in
+ * updates: mirrors.piconets.webwerks.in
+Package 3:docker-ce-19.03.5-3.el7.x86_64 already installed and latest version
+Package 1:docker-ce-cli-19.03.5-3.el7.x86_64 already installed and latest version
+Package containerd.io-1.2.10-3.2.el7.x86_64 already installed and latest version
+Nothing to do
+[root@worker2 ~]# su - worker
+[worker@worker2 ~]$ id
+uid=1000(worker) gid=1000(worker) groups=1000(worker) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+[worker@worker2 ~]$ exit
+logout
+[root@worker2 ~]# usermod -aG wheel worker
+[root@worker2 ~]# su - worker
+Last login: Thu Nov 28 01:10:31 EST 2019 on pts/0
+[worker@worker2 ~]$ sudo systemctl start docker
+
+We trust you have received the usual lecture from the local System
+Administrator. It usually boils down to these three things:
+
+    #1) Respect the privacy of others.
+    #2) Think before you type.
+    #3) With great power comes great responsibility.
+
+[sudo] password for worker:
+[worker@worker2 ~]$ sudo systemctl enable docker
+Created symlink from /etc/systemd/system/multi-user.target.wants/docker.service to /usr/lib/systemd/system/docker.service.
+[worker@worker2 ~]$ sudo docker info
+Client:
+ Debug Mode: false
+
+Server:
+ Containers: 0
+  Running: 0
+  Paused: 0
+  Stopped: 0
+ Images: 0
+ Server Version: 19.03.5
+ Storage Driver: overlay2
+  Backing Filesystem: xfs
+  Supports d_type: true
+  Native Overlay Diff: true
+ Logging Driver: json-file
+ Cgroup Driver: cgroupfs
+ Plugins:
+  Volume: local
+  Network: bridge host ipvlan macvlan null overlay
+  Log: awslogs fluentd gcplogs gelf journald json-file local logentries splunk syslog
+ Swarm: inactive
+ Runtimes: runc
+ Default Runtime: runc
+ Init Binary: docker-init
+ containerd version: b34a5c8af56e510852c35414db4c1f4fa6172339
+ runc version: 3e425f80a8c931f88e6d94a8c831b9d5aa481657
+ init version: fec3683
+ Security Options:
+  seccomp
+   Profile: default
+ Kernel Version: 3.10.0-1062.el7.x86_64
+ Operating System: CentOS Linux 7 (Core)
+ OSType: linux
+ Architecture: x86_64
+ CPUs: 1
+ Total Memory: 972.4MiB
+ Name: worker2
+ ID: WUJY:U4QB:JFKF:XB6Y:V7B2:YZSX:E73Y:7UAQ:55L6:WNNJ:M6JZ:JPSM
+ Docker Root Dir: /var/lib/docker
+ Debug Mode: false
+ Registry: https://index.docker.io/v1/
+ Labels:
+ Experimental: false
+ Insecure Registries:
+  127.0.0.0/8
+ Live Restore Enabled: false
+
+WARNING: bridge-nf-call-iptables is disabled
+WARNING: bridge-nf-call-ip6tables is disabled
+[worker@worker2 ~]$ sudo docker-compose version
+sudo: docker-compose: command not found
+[worker@worker2 ~]$ docker-compose version
+-bash: docker-compose: command not found
+[worker@worker2 ~]$ sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   617    0   617    0     0    951      0 --:--:-- --:--:-- --:--:--   952
+100 16.2M  100 16.2M    0     0  1120k      0  0:00:14  0:00:14 --:--:-- 3013k
+[worker@worker2 ~]$ sudo chmod +x /usr/local/bin/docker-compose
+[worker@worker2 ~]$ docker-compose --version
+docker-compose version 1.25.0, build 0a186604
