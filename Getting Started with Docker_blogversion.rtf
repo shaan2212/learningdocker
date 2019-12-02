@@ -1,0 +1,1425 @@
+{\rtf1\ansi\deff0\nouicompat{\fonttbl{\f0\fnil\fcharset0 Courier New;}}
+{\colortbl ;\red0\green77\blue187;}
+{\*\generator Riched20 10.0.17134}\viewkind4\uc1 
+\pard\f0\fs22\lang1033\par
+\cf1\b\fs24 Running the first docker container with image : hello-world. This is nothing but just to check your docker setup. \cf0\b0\fs22\par
+\par
+-bash-4.2$ sudo docker run hello-world\par
+Unable to find image 'hello-world:latest' locally\par
+latest: Pulling from library/hello-world\par
+1b930d010525: Pull complete\par
+Digest: sha256:4df8ca8a7e309c256d60d7971ea14c27672fc0d10c5f303856d7bc48f8cc17ff\par
+Status: Downloaded newer image for hello-world:latest\par
+\par
+Hello from Docker!\par
+This message shows that your installation appears to be working correctly.\par
+\par
+To generate this message, Docker took the following steps:\par
+ 1. The Docker client contacted the Docker daemon.\par
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.\par
+    (amd64)\par
+ 3. The Docker daemon created a new container from that image which runs the\par
+    executable that produces the output you are currently reading.\par
+ 4. The Docker daemon streamed that output to the Docker client, which sent it\par
+    to your terminal.\par
+\par
+To try something more ambitious, you can run an Ubuntu container with:\par
+ $ docker run -it ubuntu bash\par
+\par
+Share images, automate workflows, and more with a free Docker ID:\par
+ https://hub.docker.com/\par
+\par
+For more examples and ideas, visit:\par
+ https://docs.docker.com/get-started/\par
+\par
+-bash-4.2$ sudo docker images\par
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE\par
+hello-world         latest              fce289e99eb9        11 months ago       1.84kB\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+\par
+\par
+\cf1\b\fs24 Once your setup gets completed, please add the newly created docker user(in this case it is dockmgr) to docker group.\cf0\fs22\par
+\b0\par
+\par
+-bash-4.2$ sudo usermod -aG docker dockmgr\par
+-bash-4.2$ id dockmgr\par
+uid=1000(dockmgr) gid=1000(manager) groups=1000(manager),10(wheel),994(docker)\par
+-bash-4.2$\par
+\par
+\par
+\cf1\b\fs24 docker run comamnd will check locally for the mentioned image if available it will run a new container upon it, else it will pull the image from docker hub. In this example, We are running a container on ubuntu image and requested docker to provide bash shell. \cf0\b0\fs22\par
+\par
+-bash-4.2$ sudo docker run -it ubuntu /bin/bash\par
+[sudo] password for dockmgr:\par
+Unable to find image 'ubuntu:latest' locally\par
+latest: Pulling from library/ubuntu\par
+7ddbc47eeb70: Pull complete\par
+c1bbdc448b72: Pull complete\par
+8c3b70e39044: Pull complete\par
+45d437916d57: Pull complete\par
+Digest: sha256:6e9f67fa63b0323e9a1e587fd71c561ba48a034504fb804fd26fd8800039835d\par
+Status: Downloaded newer image for ubuntu:latest\par
+\par
+root@19f979a29591:/# ls -lrt\par
+total 4\par
+drwxr-xr-x.   8 root root   96 May 23  2017 lib\par
+drwxr-xr-x.   2 root root    6 Apr 24  2018 home\par
+drwxr-xr-x.   2 root root    6 Apr 24  2018 boot\par
+drwxr-xr-x.   1 root root   18 Oct 29 21:25 usr\par
+drwxr-xr-x.   2 root root    6 Oct 29 21:25 srv\par
+drwxr-xr-x.   2 root root    6 Oct 29 21:25 opt\par
+drwxr-xr-x.   2 root root    6 Oct 29 21:25 mnt\par
+drwxr-xr-x.   2 root root    6 Oct 29 21:25 media\par
+drwxr-xr-x.   2 root root   34 Oct 29 21:25 lib64\par
+drwxr-xr-x.   1 root root   17 Oct 29 21:25 var\par
+drwx------.   2 root root   37 Oct 29 21:25 root\par
+drwxr-xr-x.   2 root root 4096 Oct 29 21:25 bin\par
+drwxrwxrwt.   2 root root    6 Oct 29 21:25 tmp\par
+drwxr-xr-x.   1 root root   21 Oct 31 22:20 sbin\par
+drwxr-xr-x.   1 root root   21 Oct 31 22:20 run\par
+dr-xr-xr-x.  13 root root    0 Nov 29 03:30 sys\par
+drwxr-xr-x.   1 root root   66 Nov 29 05:02 etc\par
+dr-xr-xr-x. 122 root root    0 Nov 29 05:02 proc\par
+drwxr-xr-x.   5 root root  360 Nov 29 05:02 dev\par
+\par
+\cf1\b\fs24 To find the docker images available/downloaded locally:\cf0\b0\fs22\par
+\par
+\par
+-bash-4.2$ sudo docker images\par
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE\par
+ubuntu              latest              775349758637        4 weeks ago         64.2MB\par
+hello-world         latest              fce289e99eb9        11 months ago       1.84kB\par
+\par
+\cf1\b\fs24 Below command will create a container of ubuntu image as daemon and will print "Hello World" every second. \par
+\cf0\b0\fs22\par
+\par
+-bash-4.2$ sudo docker run -d ubuntu /bin/sh -c "while true; do echo Hello World; sleep 1; done"\par
+ad7625e2a5cb886bc40b9e784d0848c2a13c305c27217525405aa6aad06f1959\par
+-bash-4.2$\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES\par
+ad7625e2a5cb        ubuntu              "/bin/sh -c 'while t\'e2\'80\'a6"   9 seconds ago       Up 8 seconds                            objective_diffie\par
+\par
+\cf1\b\fs24 When we create a container a fancy name got allocated to it by docker. Here it is "objective_diffie". If we need to check the logs of the above container running as daemon, we can run:\par
+\cf0\b0\fs22\par
+-bash-4.2$ sudo docker logs objective_diffie\par
+Hello World\par
+Hello World\par
+Hello World\par
+Hello World\par
+Hello World\par
+Hello World\par
+Hello World\par
+Hello World\par
+Hello World\par
+Hello World\par
+Hello World\par
+Hello World\par
+\par
+\cf1\b\fs24 To stop a container:\cf0\b0\fs22\par
+\par
+-bash-4.2$ sudo docker stop objective_diffie\par
+objective_diffie\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+-bash-4.2$\par
+\par
+\cf1\b\fs24 Below command is reponsible to download the "training/webapp" image and execute the python code "app.py". As it is a web app, we need to do host-to-container port mapping. So, that we can hit the container port TCP 5000 through host machine web browser at port TCP 80. \par
+\cf0\b0\fs22\par
+-bash-4.2$ sudo docker run -d -p 80:5000 training/webapp python app.py\par
+Unable to find image 'training/webapp:latest' locally\par
+latest: Pulling from training/webapp\par
+Image docker.io/training/webapp:latest uses outdated schema1 manifest format. Please upgrade to a schema2 image for better future compatibility. More information at https://docs.docker.com/registry/spec/deprecated-schema-v1/\par
+e190868d63f8: Pull complete\par
+909cd34c6fd7: Pull complete\par
+0b9bfabab7c1: Pull complete\par
+a3ed95caeb02: Pull complete\par
+10bbbc0fc0ff: Pull complete\par
+fca59b508e9f: Pull complete\par
+e7ae2541b15b: Pull complete\par
+9dd97ef58ce9: Pull complete\par
+a4c1b0cb7af7: Pull complete\par
+Digest: sha256:06e9c1983bd6d5db5fba376ccd63bfa529e8d02f23d5079b8f74a616308fb11d\par
+Status: Downloaded newer image for training/webapp:latest\par
+d78aba119faea05d5feecf2b9a047a36f442c361c832e0311f7770cf7c7bbcf4\par
+\par
+-bash-4.2$ sudo docker images\par
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE\par
+ubuntu              latest              775349758637        4 weeks ago         64.2MB\par
+hello-world         latest              fce289e99eb9        11 months ago       1.84kB\par
+training/webapp     latest              6fae60ef3446        4 years ago         349MB\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS                  NAMES\par
+d78aba119fae        training/webapp     "python app.py"     27 seconds ago      Up 25 seconds       0.0.0.0:80->5000/tcp   inspiring_thompson\par
+\par
+\cf1\b\fs24 To view the webpage:\cf0\b0\fs22\par
+\par
+-bash-4.2$ curl http://0.0.0.0:80/\par
+Hello world!-bash-4.2$\par
+\par
+From base machine:\par
+http://192.168.29.10:80\par
+\par
+\cf1\b\fs24 To view the container-to-host mapped ports:\par
+\cf0\b0\fs22\par
+\par
+-bash-4.2$ sudo docker port d78aba119fae\par
+[sudo] password for dockmgr:\par
+5000/tcp -> 0.0.0.0:80\par
+-bash-4.2$ id\par
+uid=1000(dockmgr) gid=1000(manager) groups=1000(manager),10(wheel) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023\par
+-bash-4.2$ sudo docker port d78aba119fae 5000\par
+0.0.0.0:80\par
+-bash-4.2$ sudo docker port inspiring_thompson 5000\par
+0.0.0.0:80\par
+-bash-4.2$\par
+\par
+\par
+-bash-4.2$ sudo docker stop inspiring_thompson\par
+inspiring_thompson\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+-bash-4.2$\par
+\par
+-bash-4.2$ sudo docker run ubuntu /bin/echo "Hello World"\par
+Hello World\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+-bash-4.2$ sudo docker images\par
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE\par
+ubuntu              latest              775349758637        4 weeks ago         64.2MB\par
+hello-world         latest              fce289e99eb9        11 months ago       1.84kB\par
+training/webapp     latest              6fae60ef3446        4 years ago         349MB\par
+\par
+\cf1\b\fs24 --name keyword is used to name a container without using the docker defined names:\par
+\cf0\b0\fs22\par
+-bash-4.2$ sudo docker run --name Shantanu ubuntu /bin/echo "Hello World"\par
+Hello World\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+\par
+\cf1\b\fs24 To view the container attributes, docker inspect command has been used. you can get the information about driver, network, etc.\par
+\cf0\b0\fs22\par
+-bash-4.2$ sudo docker inspect Shantanu\par
+[\par
+    \{\par
+        "Id": "3dd11a45ea66efd0e31b7b6495f365b71847262e4b4aea393d8831ff0d88aa91",\par
+        "Created": "2019-11-29T05:33:04.274948048Z",\par
+        "Path": "/bin/echo",\par
+        "Args": [\par
+            "Hello World"\par
+        ],\par
+        "State": \{\par
+            "Status": "exited",\par
+            "Running": false,\par
+            "Paused": false,\par
+            "Restarting": false,\par
+            "OOMKilled": false,\par
+            "Dead": false,\par
+            "Pid": 0,\par
+            "ExitCode": 0,\par
+            "Error": "",\par
+            "StartedAt": "2019-11-29T05:33:04.903288236Z",\par
+            "FinishedAt": "2019-11-29T05:33:04.845752218Z"\par
+        \},\par
+        "Image": "sha256:775349758637aff77bf85e2ff0597e86e3e859183ef0baba8b3e8fc8d3cba51c",\par
+        "ResolvConfPath": "/var/lib/docker/containers/3dd11a45ea66efd0e31b7b6495f365b71847262e4b4aea393d8831ff0d88aa91/resolv.conf",\par
+        "HostnamePath": "/var/lib/docker/containers/3dd11a45ea66efd0e31b7b6495f365b71847262e4b4aea393d8831ff0d88aa91/hostname",\par
+        "HostsPath": "/var/lib/docker/containers/3dd11a45ea66efd0e31b7b6495f365b71847262e4b4aea393d8831ff0d88aa91/hosts",\par
+        "LogPath": "/var/lib/docker/containers/3dd11a45ea66efd0e31b7b6495f365b71847262e4b4aea393d8831ff0d88aa91/3dd11a45ea66efd0e31b7b6495f365b71847262e4b4aea393d8831ff0d88aa91-json.log",\par
+        "Name": "/Shantanu",\par
+        "RestartCount": 0,\par
+        "Driver": "overlay2",\par
+        "Platform": "linux",\par
+        "MountLabel": "",\par
+        "ProcessLabel": "",\par
+        "AppArmorProfile": "",\par
+        "ExecIDs": null,\par
+.\par
+.\par
+.\par
+.\par
+\par
+            "Networks": \{\par
+                "bridge": \{\par
+                    "IPAMConfig": null,\par
+                    "Links": null,\par
+                    "Aliases": null,\par
+                    "NetworkID": "967757ddd2efc9649725da1708c4c24631d5dc2e9486fcebded5b392d14d3b77",\par
+                    "EndpointID": "",\par
+                    "Gateway": "",\par
+                    "IPAddress": "",\par
+                    "IPPrefixLen": 0,\par
+                    "IPv6Gateway": "",\par
+                    "GlobalIPv6Address": "",\par
+                    "GlobalIPv6PrefixLen": 0,\par
+                    "MacAddress": "",\par
+                    "DriverOpts": null\par
+                \}\par
+            \}\par
+        \}\par
+    \}\par
+]\par
+\par
+\par
+\cf1\b\fs24 docker pull command is used to pull a image from docker hub to your local machine without starting/creating a container:\cf0\b0\fs22\par
+\par
+-bash-4.2$ sudo docker pull centos\par
+Using default tag: latest\par
+latest: Pulling from library/centos\par
+729ec3a6ada3: Pull complete\par
+Digest: sha256:f94c1d992c193b3dc09e297ffd54d8a4f1dc946c37cbeceb26d35ce1647f88d9\par
+Status: Downloaded newer image for centos:latest\par
+docker.io/library/centos:latest\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+-bash-4.2$ sudo docker images\par
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE\par
+ubuntu              latest              775349758637        4 weeks ago         64.2MB\par
+centos              latest              0f3e07c0138f        8 weeks ago         220MB\par
+hello-world         latest              fce289e99eb9        11 months ago       1.84kB\par
+training/webapp     latest              6fae60ef3446        4 years ago         349MB\par
+-bash-4.2$\par
+\par
+\cf1\b\fs24 The same image can be used to run a container. Here, the centos image which was pulled in the previous step has been used to run a container with /bin/bash shell.\par
+\cf0\b0\fs22\par
+-bash-4.2$ sudo docker run -it centos:latest /bin/bash\par
+[root@2b3c4f44d979 /]# ls -lrt\par
+total 0\par
+drwxr-xr-x.   2 root root   6 May 11  2019 srv\par
+lrwxrwxrwx.   1 root root   8 May 11  2019 sbin -> usr/sbin\par
+drwxr-xr-x.   2 root root   6 May 11  2019 opt\par
+drwxr-xr-x.   2 root root   6 May 11  2019 mnt\par
+drwxr-xr-x.   2 root root   6 May 11  2019 media\par
+lrwxrwxrwx.   1 root root   9 May 11  2019 lib64 -> usr/lib64\par
+lrwxrwxrwx.   1 root root   7 May 11  2019 lib -> usr/lib\par
+drwxr-xr-x.   2 root root   6 May 11  2019 home\par
+lrwxrwxrwx.   1 root root   7 May 11  2019 bin -> usr/bin\par
+drwx------.   2 root root   6 Sep 27 17:13 lost+found\par
+drwxr-xr-x.  12 root root 144 Sep 27 17:13 usr\par
+drwxr-xr-x.  20 root root 262 Sep 27 17:13 var\par
+drwxrwxrwt.   7 root root 145 Sep 27 17:13 tmp\par
+drwxr-xr-x.  11 root root 163 Sep 27 17:13 run\par
+dr-xr-x---.   2 root root 162 Sep 27 17:13 root\par
+dr-xr-xr-x.  13 root root   0 Nov 29 03:30 sys\par
+drwxr-xr-x.   1 root root  66 Nov 29 05:38 etc\par
+dr-xr-xr-x. 122 root root   0 Nov 29 05:38 proc\par
+drwxr-xr-x.   5 root root 360 Nov 29 05:38 dev\par
+[root@2b3c4f44d979 /]# hostname\par
+2b3c4f44d979\par
+[root@2b3c4f44d979 /]# uptime\par
+ 05:39:02 up  2:08,  0 users,  load average: 0.56, 0.22, 0.12\par
+[root@2b3c4f44d979 /]# exit\par
+exit\par
+\par
+\par
+\cf1\b\fs24 docker search command is used to search for an image locally & in docker hub.\cf0\b0\fs22\par
+\par
+-bash-4.2$ sudo docker search sinatra\par
+NAME                                  DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED\par
+training/sinatra                                                                      18                                  \par
+tongueroo/sinatra                                                                     1                                   \par
+mcansky/sinatra_hello                 A simple, hello worldly sinatra app in a con\'e2\'80\'a6   0                                   \par
+gruntwork/sinatra-backend                                                             0                                   \par
+pranay/sinatra                        FROM ubuntu:14.04 RUN apt-get update && apt-\'e2\'80\'a6   0                                   \par
+marceldegraaf/sinatra                 Sinatra test app                                0                                   \par
+convox/sinatra                        Convox base image for Sinatra                   0                                       [OK]\par
+franklinyu/sinatra-hello              This is a hello-world server built with Sina\'e2\'80\'a6   0                                       [OK]\par
+thoom/sinatra-mock                    Used to build a Sinatra-backed mock web serv\'e2\'80\'a6   0                                       [OK]\par
+capttofu/sinatra-with-logstash                                                        0                                   \par
+glazziq/sinatra-ok                    A simple Sinatra application that will respo\'e2\'80\'a6   0                                   \par
+gitresolve/sinatra                    Simple sinatra app for testing                  0                                   \par
+arshiagg/sinatra                      Sinatra web server running a ruby exporter      0                                   \par
+pmblanco/sinatra                                                                      0                                   \par
+torico/sinatra-async                  port 3001. for AWS                              0                                       [OK]\par
+amireh/sinatra                        Ruby Sinatra with live-reload for developmen\'e2\'80\'a6   0                                       [OK]\par
+eventingmonkey/sinatra                                                                0                                   \par
+dancodes/sinatra-heroku-docker        An image used to speed up CI builds of Sinat\'e2\'80\'a6   0                                       [OK]\par
+esteveavi/sinatra                     Sinatra example                                 0                                   \par
+gwjjeff/sinatra                                                                       0                                       [OK]\par
+zoomix/sinatra-galleria                                                               0                                       [OK]\par
+carlad/sinatra                                                                        0                                   \par
+welldoer/sinatra                      Sinatra webapp                                  0                                       [OK]\par
+nilsc/sinatra                                                                         0                                   \par
+marceldegraaf/sinatra-with-logstash   Sinatra test app with logstash-forwarder to \'e2\'80\'a6   0                                   \par
+-bash-4.2$\par
+\par
+\par
+\cf1\b\fs24 To login to your Docker account and to push and pull images from Docker Hub use your Docker ID.\cf0\b0\fs22\par
+\par
+\par
+-bash-4.2$ sudo docker login\par
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.\par
+Username: shaan2212\par
+Password:\par
+WARNING! Your password will be stored unencrypted in /root/.docker/config.json.\par
+Configure a credential helper to remove this warning. See\par
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store\par
+\par
+Login Succeeded\par
+\par
+\par
+\cf1\b\fs24 Your password will be stored unencrypted in /root/.docker/config.json\cf0\b0\fs22\par
+\par
+-bash-4.2$ sudo cat /root/.docker/config.json\par
+\{\par
+        "auths": \{\par
+                "https://index.docker.io/v1/": \{\par
+                        "auth": "c2hhYW4yMjEyOlNoYWFuQDIyMTI="\par
+                \}\par
+        \},\par
+        "HttpHeaders": \{\par
+                "User-Agent": "Docker-Client/19.03.5 (linux)"\par
+        \}\par
+\}-bash-4.2$\par
+\par
+\par
+\cf1\b\fs24 Pull an image, run a container using it, modify and push it to dockerhub, so that the updated image can be used directly later on. It will save us the overhead to do the repeated things. Here in a centos image we are adding webserver - httpd and binding it as new image while pushing it to dockerhub.\cf0\b0\fs22\par
+\par
+-bash-4.2$ sudo docker run -ti centos /bin/bash\par
+[root@f3bc073ecc85 /]# yum install httpd\par
+Failed to set locale, defaulting to C\par
+CentOS-8 - AppStream                                                                      256 kB/s | 6.3 MB     00:25\par
+CentOS-8 - Base                                                                           937 kB/s | 7.9 MB     00:08\par
+CentOS-8 - Extras                                                                         392  B/s | 2.1 kB     00:05\par
+Dependencies resolved.\par
+==========================================================================================================================\par
+ Package                      Arch             Version                                          Repository           Size\par
+==========================================================================================================================\par
+Installing:\par
+ httpd                        x86_64           2.4.37-12.module_el8.0.0+185+5908b0db            AppStream           1.7 M\par
+Installing dependencies:\par
+ apr                          x86_64           1.6.3-9.el8                                      AppStream           125 k\par
+ apr-util                     x86_64           1.6.1-6.el8                                      AppStream           105 k\par
+ centos-logos-httpd           noarch           80.5-2.el8                                       AppStream            24 k\par
+ httpd-filesystem             noarch           2.4.37-12.module_el8.0.0+185+5908b0db            AppStream            35 k\par
+ httpd-tools                  x86_64           2.4.37-12.module_el8.0.0+185+5908b0db            AppStream           102 k\par
+ mod_http2                    x86_64           1.11.3-3.module_el8.0.0+185+5908b0db             AppStream           158 k\par
+ brotli                       x86_64           1.0.6-1.el8                                      BaseOS              323 k\par
+ mailcap                      noarch           2.1.48-3.el8                                     BaseOS               39 k\par
+Installing weak dependencies:\par
+ apr-util-bdb                 x86_64           1.6.1-6.el8                                      AppStream            25 k\par
+ apr-util-openssl             x86_64           1.6.1-6.el8                                      AppStream            27 k\par
+Enabling module streams:\par
+ httpd                                         2.4\par
+\par
+Transaction Summary\par
+==========================================================================================================================\par
+Install  11 Packages\par
+\par
+Total download size: 2.6 M\par
+Installed size: 7.6 M\par
+Is this ok [y/N]: y\par
+Downloading Packages:\par
+CentOS-8 - AppStream                     195% [===========================================================================(1/11): apr-util-bdb-1.6.1-6.el8.x86_64.rpm                                                66 kB/s |  25 kB     00:00\par
+(2/11): apr-util-1.6.1-6.el8.x86_64.rpm                                                   118 kB/s | 105 kB     00:00\par
+(3/11): apr-1.6.3-9.el8.x86_64.rpm                                                        140 kB/s | 125 kB     00:00\par
+(4/11): apr-util-openssl-1.6.1-6.el8.x86_64.rpm                                            38 kB/s |  27 kB     00:00\par
+(5/11): centos-logos-httpd-80.5-2.el8.noarch.rpm                                           87 kB/s |  24 kB     00:00\par
+(6/11): httpd-filesystem-2.4.37-12.module_el8.0.0+185+5908b0db.noarch.rpm                  88 kB/s |  35 kB     00:00\par
+(7/11): httpd-tools-2.4.37-12.module_el8.0.0+185+5908b0db.x86_64.rpm                      101 kB/s | 102 kB     00:01\par
+(8/11): mod_http2-1.11.3-3.module_el8.0.0+185+5908b0db.x86_64.rpm                         121 kB/s | 158 kB     00:01\par
+(9/11): mailcap-2.1.48-3.el8.noarch.rpm                                                   102 kB/s |  39 kB     00:00\par
+(10/11): brotli-1.0.6-1.el8.x86_64.rpm                                                    271 kB/s | 323 kB     00:01\par
+(11/11): httpd-2.4.37-12.module_el8.0.0+185+5908b0db.x86_64.rpm                           132 kB/s | 1.7 MB     00:12\par
+--------------------------------------------------------------------------------------------------------------------------\par
+Total                                                                                     155 kB/s | 2.6 MB     00:17\par
+warning: /var/cache/dnf/AppStream-02e86d1c976ab532/packages/apr-1.6.3-9.el8.x86_64.rpm: Header V3 RSA/SHA256 Signature, key ID 8483c65d: NOKEY\par
+CentOS-8 - AppStream                                                                      1.1 MB/s | 1.6 kB     00:00\par
+Importing GPG key 0x8483C65D:\par
+ Userid     : "CentOS (CentOS Official Signing Key) <security@centos.org>"\par
+ Fingerprint: 99DB 70FA E1D7 CE22 7FB6 4882 05B5 55B3 8483 C65D\par
+ From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial\par
+Is this ok [y/N]: y\par
+Key imported successfully\par
+Running transaction check\par
+Transaction check succeeded.\par
+Running transaction test\par
+Transaction test succeeded.\par
+Running transaction\par
+  Preparing        :                                                                                                  1/1\par
+  Installing       : apr-1.6.3-9.el8.x86_64                                                                          1/11\par
+  Running scriptlet: apr-1.6.3-9.el8.x86_64                                                                          1/11\par
+  Installing       : apr-util-bdb-1.6.1-6.el8.x86_64                                                                 2/11\par
+  Installing       : apr-util-openssl-1.6.1-6.el8.x86_64                                                             3/11\par
+  Installing       : apr-util-1.6.1-6.el8.x86_64                                                                     4/11\par
+  Running scriptlet: apr-util-1.6.1-6.el8.x86_64                                                                     4/11\par
+  Installing       : httpd-tools-2.4.37-12.module_el8.0.0+185+5908b0db.x86_64                                        5/11\par
+  Installing       : mailcap-2.1.48-3.el8.noarch                                                                     6/11\par
+  Installing       : brotli-1.0.6-1.el8.x86_64                                                                       7/11\par
+  Running scriptlet: httpd-filesystem-2.4.37-12.module_el8.0.0+185+5908b0db.noarch                                   8/11\par
+  Installing       : httpd-filesystem-2.4.37-12.module_el8.0.0+185+5908b0db.noarch                                   8/11\par
+  Installing       : centos-logos-httpd-80.5-2.el8.noarch                                                            9/11\par
+  Installing       : mod_http2-1.11.3-3.module_el8.0.0+185+5908b0db.x86_64                                          10/11\par
+  Installing       : httpd-2.4.37-12.module_el8.0.0+185+5908b0db.x86_64                                             11/11\par
+  Running scriptlet: httpd-2.4.37-12.module_el8.0.0+185+5908b0db.x86_64                                             11/11\par
+  Verifying        : apr-1.6.3-9.el8.x86_64                                                                          1/11\par
+  Verifying        : apr-util-1.6.1-6.el8.x86_64                                                                     2/11\par
+  Verifying        : apr-util-bdb-1.6.1-6.el8.x86_64                                                                 3/11\par
+  Verifying        : apr-util-openssl-1.6.1-6.el8.x86_64                                                             4/11\par
+  Verifying        : centos-logos-httpd-80.5-2.el8.noarch                                                            5/11\par
+  Verifying        : httpd-2.4.37-12.module_el8.0.0+185+5908b0db.x86_64                                              6/11\par
+  Verifying        : httpd-filesystem-2.4.37-12.module_el8.0.0+185+5908b0db.noarch                                   7/11\par
+  Verifying        : httpd-tools-2.4.37-12.module_el8.0.0+185+5908b0db.x86_64                                        8/11\par
+  Verifying        : mod_http2-1.11.3-3.module_el8.0.0+185+5908b0db.x86_64                                           9/11\par
+  Verifying        : brotli-1.0.6-1.el8.x86_64                                                                      10/11\par
+  Verifying        : mailcap-2.1.48-3.el8.noarch                                                                    11/11\par
+\par
+Installed:\par
+  httpd-2.4.37-12.module_el8.0.0+185+5908b0db.x86_64             apr-util-bdb-1.6.1-6.el8.x86_64\par
+  apr-util-openssl-1.6.1-6.el8.x86_64                            apr-1.6.3-9.el8.x86_64\par
+  apr-util-1.6.1-6.el8.x86_64                                    centos-logos-httpd-80.5-2.el8.noarch\par
+  httpd-filesystem-2.4.37-12.module_el8.0.0+185+5908b0db.noarch  httpd-tools-2.4.37-12.module_el8.0.0+185+5908b0db.x86_64\par
+  mod_http2-1.11.3-3.module_el8.0.0+185+5908b0db.x86_64          brotli-1.0.6-1.el8.x86_64\par
+  mailcap-2.1.48-3.el8.noarch\par
+\par
+Complete!\par
+[root@f3bc073ecc85 /]#\par
+\par
+\cf1\b\fs24 Committing the image with some message, as we do in git. \cf0\b0\fs22\par
+\par
+-bash-4.2$ sudo docker commit -m "Added httpd on CentOS" -a "Shantanu" f3bc073ecc85 shaan2212/centos:versionnew\par
+sha256:adbc83d26a394399663e4730e0a9c98f7906a12ab2bcab703d926abb6e82edd6\par
+-bash-4.2$ sudo docker images\par
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE\par
+shaan2212/centos    versionnew          adbc83d26a39        15 seconds ago      269MB\par
+ubuntu              latest              775349758637        4 weeks ago         64.2MB\par
+centos              latest              0f3e07c0138f        8 weeks ago         220MB\par
+hello-world         latest              fce289e99eb9        11 months ago       1.84kB\par
+training/webapp     latest              6fae60ef3446        4 years ago         349MB\par
+-bash-4.2$\par
+\par
+\cf1\b\fs24 Pushing the new image named as "centos:versionnew" to dockerhub\cf0\b0\par
+\fs22\par
+-bash-4.2$ sudo docker push shaan2212/centos:versionnew\par
+The push refers to repository [docker.io/shaan2212/centos]\par
+8c4f4ced0acf: Pushed\par
+9e607bb861a7: Mounted from library/centos\par
+versionnew: digest: sha256:c51555b889b09b3dc5b3f3ddf0a70a3ee676ffd92a3350939bd7f44d6119703b size: 741\par
+-bash-4.2$\par
+\par
+\cf1\b\fs24 https://hub.docker.com/repository/docker/shaan2212/centos   === We can find it here now\par
+\cf0\b0\fs22\par
+\par
+\cf1\b\fs24 Remove a docker image from the local system.\par
+\cf0\b0\fs22\par
+-bash-4.2$ sudo docker rmi shaan2212/centos:versionnew\par
+Untagged: shaan2212/centos:versionnew\par
+Untagged: shaan2212/centos@sha256:c51555b889b09b3dc5b3f3ddf0a70a3ee676ffd92a3350939bd7f44d6119703b\par
+Deleted: sha256:adbc83d26a394399663e4730e0a9c98f7906a12ab2bcab703d926abb6e82edd6\par
+Deleted: sha256:c6320d74c682c7ae027d1b8a10db9723640d5a83e0162a42341e5ac31b33060e\par
+-bash-4.2$\par
+\par
+\par
+-bash-4.2$ sudo docker images\par
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE\par
+ubuntu              latest              775349758637        4 weeks ago         64.2MB\par
+centos              latest              0f3e07c0138f        8 weeks ago         220MB\par
+hello-world         latest              fce289e99eb9        11 months ago       1.84kB\par
+training/webapp     latest              6fae60ef3446        4 years ago         349MB\par
+-bash-4.2$\par
+\par
+\cf1\b\fs28 Linking Containers using --link command:\par
+\par
+\fs24 Links allow containers to discover each other and securely transfer information about one container to another container. When you set up a link, you create a conduit between a source container and a recipient container. The recipient can then access select data about the source. \par
+\par
+\par
+Running a container on postgres image with name "dblink"\par
+\cf0\b0\fs22\par
+-bash-4.2$ sudo docker run -d --name dblink training/postgres\par
+\par
+Unable to find image 'training/postgres:latest' locally\par
+latest: Pulling from training/postgres\par
+Image docker.io/training/postgres:latest uses outdated schema1 manifest format. Please upgrade to a schema2 image for better future compatibility. More information at https://docs.docker.com/registry/spec/deprecated-schema-v1/\par
+a3ed95caeb02: Pull complete\par
+6e71c809542e: Pull complete\par
+2978d9af87ba: Pull complete\par
+e1bca35b062f: Pull complete\par
+500b6decf741: Pull complete\par
+74b14ef2151f: Pull complete\par
+7afd5ed3826e: Pull complete\par
+3c69bb244f5e: Pull complete\par
+d86f9ec5aedf: Pull complete\par
+010fabf20157: Pull complete\par
+Digest: sha256:a945dc6dcfbc8d009c3d972931608344b76c2870ce796da00a827bd50791907e\par
+Status: Downloaded newer image for training/postgres:latest\par
+cd1e31374441740e45500f0dfc1c89c6c05da692f3f6506ec7eb9216997d0170\par
+\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES\par
+cd1e31374441        training/postgres   "su postgres -c '/us\'e2\'80\'a6"   26 seconds ago      Up 24 seconds       5432/tcp            dblink\par
+\par
+-bash-4.2$ sudo docker logs dblink\par
+2019-11-29 06:06:45 UTC LOG:  database system was interrupted; last known up at 2014-06-02 23:51:25 UTC\par
+2019-11-29 06:06:45 UTC LOG:  database system was not properly shut down; automatic recovery in progress\par
+2019-11-29 06:06:45 UTC LOG:  redo starts at 0/1782F38\par
+2019-11-29 06:06:45 UTC LOG:  record with zero length at 0/17835C8\par
+2019-11-29 06:06:45 UTC LOG:  redo done at 0/1783598\par
+2019-11-29 06:06:45 UTC LOG:  last completed transaction was at log time 2014-06-02 23:51:25.978993+00\par
+2019-11-29 06:06:45 UTC LOG:  database system is ready to accept connections\par
+2019-11-29 06:06:45 UTC LOG:  autovacuum launcher started\par
+\par
+\par
+\cf1\b\fs24 Started another container with name "web" and linked it with the previous container by using --link dblink:dblinknew (--link <name or id>:alias)\par
+\cf0\b0\fs22\par
+-bash-4.2$ sudo docker run -d -P --name web --link dblink:dblinknew training/webapp python app.py\par
+eb3041503270bce10dcb8a9da2fbcecfbd87d302a5f2bb6004b6db313d8f93bb\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                     NAMES\par
+eb3041503270        training/webapp     "python app.py"          9 seconds ago       Up 7 seconds        0.0.0.0:32768->5000/tcp   web\par
+cd1e31374441        training/postgres   "su postgres -c '/us\'e2\'80\'a6"   5 minutes ago       Up 5 minutes        5432/tcp                  dblink\par
+-bash-4.2$ curl http://0.0.0.0:32768\par
+Hello world!-bash-4.2$\par
+\par
+\par
+\cf1\b\fs24 Link can be checked by inspecting the web container:\cf0\b0\fs22\par
+\par
+\par
+-bash-4.2$ sudo docker inspect web | grep -i link\par
+            "Links": [\par
+                "/dblink:/web/dblinknew"\par
+            "LinkLocalIPv6Address": "",\par
+            "LinkLocalIPv6PrefixLen": 0,\par
+                    "Links": null,\par
+-bash-4.2$\par
+\par
+\par
+\cf1\b Docker creates several environment variables when you link containers. Docker automatically creates environment variables in the target container based on the --link parameters. It also exposes all environment variables originating from Docker from the source container. These include variables from:\par
+\par
+the ENV commands in the source container\rquote s Dockerfile\par
+the -e, --env, and --env-file options on the docker run command when the source container is started\par
+\cf0\b0\par
+\par
+\cf1\b\fs24 --rm can be used when we want to exit/terminate the container after fulfilling the requirement. \par
+\par
+--rm : Remove container after run. Ignored in detached mode.\par
+\cf0\b0\fs22\par
+-bash-4.2$ sudo docker run --rm --name web3 --link dblink:dblinknew training/webapp env\par
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\par
+HOSTNAME=d40aac4fbaad\par
+DBLINKNEW_PORT=tcp://172.17.0.2:5432\par
+DBLINKNEW_PORT_5432_TCP=tcp://172.17.0.2:5432\par
+DBLINKNEW_PORT_5432_TCP_ADDR=172.17.0.2\par
+DBLINKNEW_PORT_5432_TCP_PORT=5432\par
+DBLINKNEW_PORT_5432_TCP_PROTO=tcp\par
+DBLINKNEW_NAME=/web3/dblinknew\par
+DBLINKNEW_ENV_PG_VERSION=9.3\par
+HOME=/root\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                     NAMES\par
+eb3041503270        training/webapp     "python app.py"          7 minutes ago       Up 7 minutes        0.0.0.0:32768->5000/tcp   web\par
+cd1e31374441        training/postgres   "su postgres -c '/us\'e2\'80\'a6"   12 minutes ago      Up 12 minutes       5432/tcp                  dblink\par
+-bash-4.2$\par
+\par
+\par
+\cf1\b In addition to the environment variables, Docker adds a host entry for the source container to the /etc/hosts file. Here\rquote s an entry for the web container. You can see two relevant host entries. The first is an entry for the dblink ontainer that uses the Container ID as a host name. The second entry uses the link alias to reference the IP address of the new container. \cf0\b0\par
+\par
+\par
+-bash-4.2$ sudo docker run -ti --rm --link dblink:web training/webapp /bin/bash\par
+root@32c9ca99e004:/opt/webapp# cat /etc/hosts\par
+127.0.0.1       localhost\par
+::1     localhost ip6-localhost ip6-loopback\par
+fe00::0 ip6-localnet\par
+ff00::0 ip6-mcastprefix\par
+ff02::1 ip6-allnodes\par
+ff02::2 ip6-allrouters\par
+172.17.0.2      web cd1e31374441 dblink\par
+172.17.0.4      32c9ca99e004\par
+root@32c9ca99e004:/opt/webapp#\par
+\par
+\par
+-bash-4.2$ sudo docker stop dblink\par
+dblink\par
+\par
+-bash-4.2$ sudo docker stop web\par
+web\par
+\par
+\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+-bash-4.2$ sudo docker images\par
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE\par
+ubuntu              latest              775349758637        4 weeks ago         64.2MB\par
+centos              latest              0f3e07c0138f        8 weeks ago         220MB\par
+hello-world         latest              fce289e99eb9        11 months ago       1.84kB\par
+training/webapp     latest              6fae60ef3446        4 years ago         349MB\par
+training/postgres   latest              6fa973bb3c26        5 years ago         365MB\par
+-bash-4.2$\par
+\par
+\cf1\b\fs28 Creating Volume:\par
+\par
+\b0\fs22 Volumes are the preferred mechanism for persisting data generated by and used by Docker containers. While bind mounts are dependent on the directory structure of the host machine, volumes are completely managed by Docker. Volumes have several advantages over bind mounts:\par
+\par
+Volumes are easier to back up or migrate than bind mounts.\par
+You can manage volumes using Docker CLI commands or the Docker API.\par
+Volumes work on both Linux and Windows containers.\par
+Volumes can be more safely shared among multiple containers.\par
+Volume drivers let you store volumes on remote hosts or cloud providers, to encrypt the contents of volumes, or to add other functionality.\par
+New volumes can have their content pre-populated by a container.\par
+In addition, volumes are often a better choice than persisting data in a container\rquote s writable layer, because a volume does not increase the size of the containers using it, and the volume\rquote s contents exist outside the lifecycle of a given container.\cf0\par
+\par
+
+\pard\cf1\b\fs24 -h : It is used to update the container hostname.\par
+
+\pard -v : It is used to specify the volume on the container. \par
+\par
+\par
+The idea is to mount a volume in a container and write some data into it. Later on, we can share the same volume to another container and we must find out the data written to the 1st container inside the volume.\cf0\b0\fs22\par
+\par
+-bash-4.2$ sudo docker run -it --name container-data -h CONTAINER -v /data debian /bin/bash\par
+\par
+Unable to find image 'debian:latest' locally\par
+latest: Pulling from library/debian\par
+16ea0e8c8879: Pull complete\par
+Digest: sha256:79f0b1682af1a6a29ff63182c8103027f4de98b22d8fb50040e9c4bb13e3de78\par
+Status: Downloaded newer image for debian:latest\par
+root@CONTAINER:/# ls\par
+bin  boot  data  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var\par
+root@CONTAINER:/# df -Ph\par
+Filesystem               Size  Used Avail Use% Mounted on\par
+overlay                   17G  2.9G   15G  17% /\par
+tmpfs                     64M     0   64M   0% /dev\par
+tmpfs                    487M     0  487M   0% /sys/fs/cgroup\par
+shm                       64M     0   64M   0% /dev/shm\par
+/dev/mapper/centos-root   17G  2.9G   15G  17% /data\par
+tmpfs                    487M     0  487M   0% /proc/asound\par
+tmpfs                    487M     0  487M   0% /proc/acpi\par
+tmpfs                    487M     0  487M   0% /proc/scsi\par
+tmpfs                    487M     0  487M   0% /sys/firmware\par
+root@CONTAINER:/#\par
+root@CONTAINER:/#\par
+root@CONTAINER:/# cd /data\par
+root@CONTAINER:/data# pwd\par
+/data\par
+root@CONTAINER:/data#\par
+root@CONTAINER:/data#\par
+root@CONTAINER:/data# ls -l\par
+total 0\par
+root@CONTAINER:/data#\par
+root@CONTAINER:/data# echo "hello" > myfile\par
+root@CONTAINER:/data#\par
+root@CONTAINER:/data#\par
+root@CONTAINER:/data# ll\par
+bash: ll: command not found\par
+root@CONTAINER:/data#\par
+root@CONTAINER:/data# ls -l\par
+total 4\par
+-rw-r--r--. 1 root root 6 Nov 30 05:28 myfile\par
+root@CONTAINER:/data#\par
+root@CONTAINER:/data#\par
+root@CONTAINER:/data# exit\par
+exit\par
+-bash-4.2$\par
+-bash-4.2$ sudo docker images\par
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE\par
+debian              latest              67e34c1c9477        7 days ago          114MB\par
+ubuntu              latest              775349758637        4 weeks ago         64.2MB\par
+centos              latest              0f3e07c0138f        8 weeks ago         220MB\par
+hello-world         latest              fce289e99eb9        11 months ago       1.84kB\par
+training/webapp     latest              6fae60ef3446        4 years ago         349MB\par
+training/postgres   latest              6fa973bb3c26        5 years ago         365MB\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+-bash-4.2$\par
+\par
+-bash-4.2$ sudo docker inspect container-data | grep -i volume\par
+            "VolumeDriver": "",\par
+            "VolumesFrom": null,\par
+                "Type": "volume",\par
+                "Source": "/var/lib/docker/volumes/54eb0fd9a42db9f4d24f3edcbb6c9f3fcbc6d74029a12b5f5575f8d7998b6445/_data",\par
+            "Volumes": \{\par
+-bash-4.2$\par
+\par
+\par
+\cf1\b On base OS, we can find the container volume on the below path.\par
+\cf0\b0\par
+[root@manager ~]# ls -ld /var/lib/docker/volumes/54eb0fd9a42db9f4d24f3edcbb6c9f3fcbc6d74029a12b5f5575f8d7998b6445/_data\par
+drwxr-xr-x. 2 root root 20 Nov 30 00:28 /var/lib/docker/volumes/54eb0fd9a42db9f4d24f3edcbb6c9f3fcbc6d74029a12b5f5575f8d7998b6445/_data\par
+[root@manager ~]#\par
+\par
+\cf1\b Sharing Volumes between containers:\cf0\b0\par
+\par
+-bash-4.2$ sudo docker run -it --name second-container-data -h NEWCONTAINER --volumes-from container-data centos /bin/bash\par
+[sudo] password for dockmgr:\par
+\par
+[root@NEWCONTAINER /]# df -Ph\par
+Filesystem               Size  Used Avail Use% Mounted on\par
+overlay                   17G  2.9G   15G  17% /\par
+tmpfs                     64M     0   64M   0% /dev\par
+tmpfs                    487M     0  487M   0% /sys/fs/cgroup\par
+shm                       64M     0   64M   0% /dev/shm\par
+/dev/mapper/centos-root   17G  2.9G   15G  17% /data\par
+tmpfs                    487M     0  487M   0% /proc/asound\par
+tmpfs                    487M     0  487M   0% /proc/acpi\par
+tmpfs                    487M     0  487M   0% /proc/scsi\par
+tmpfs                    487M     0  487M   0% /sys/firmware\par
+[root@NEWCONTAINER /]#\par
+\par
+[root@NEWCONTAINER /]# cd /data\par
+[root@NEWCONTAINER data]# ls -l\par
+total 4\par
+-rw-r--r--. 1 root root 6 Nov 30 05:28 myfile\par
+[root@NEWCONTAINER data]# cat myfile\par
+hello\par
+[root@NEWCONTAINER data]#\par
+\par
+\par
+\par
+\cf1\b\fs24 Backup of a volume /data created earlier:\cf0\b0\fs22\par
+\par
+\par
+-bash-4.2$ sudo docker run --volumes-from container-data -v $(pwd):/backup centos tar cvf /backup/data.tar /data\par
+[sudo] password for dockmgr:\par
+tar: Removing leading `/' from member names\par
+/data/\par
+/data/myfile\par
+-bash-4.2$ pwd\par
+/home/dockmgr\par
+-bash-4.2$ ls -la\par
+total 12\par
+drwxr-xr-x. 2 root root    22 Nov 30 01:31 .\par
+drwxr-xr-x. 3 root root    21 Nov 28 00:55 ..\par
+-rw-r--r--. 1 root root 10240 Nov 30 01:31 data.tar\par
+-bash-4.2$ tar -tvf data.tar\par
+drwxr-xr-x root/root         0 2019-11-30 00:28 data/\par
+-rw-r--r-- root/root         6 2019-11-30 00:28 data/myfile\par
+-bash-4.2$ sudo tar -xvf data.tar\par
+data/\par
+data/myfile\par
+-bash-4.2$ ls -l\par
+total 12\par
+drwxr-xr-x. 2 root root    20 Nov 30 00:28 data\par
+-rw-r--r--. 1 root root 10240 Nov 30 01:31 data.tar\par
+-bash-4.2$ cd data\par
+-bash-4.2$ ll\par
+total 4\par
+-rw-r--r--. 1 root root 6 Nov 30 00:28 myfile\par
+-bash-4.2$ cat myfile\par
+hello\par
+-bash-4.2$\par
+\par
+\par
+\cf1\b\fs24 Pull an image, run it , rename it to usergiven name and attach a shell then create a directory inside it. Exit.. Then start the container and again attach the shell. you will notice the same container ID is available and you can see the directory created in the earlier step. But it will be not available if you create another container from the same image.\cf0\b0\fs22\par
+\par
+\par
+-bash-4.2$ docker pull fedora:latest\par
+latest: Pulling from library/fedora\par
+d318c91bf2a8: Pull complete\par
+Digest: sha256:d4f7df6b691d61af6cee7328f82f1d8afdef63bc38f58516858ae3045083924a\par
+Status: Downloaded newer image for fedora:latest\par
+docker.io/library/fedora:latest\par
+-bash-4.2$ sudo docker images\par
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE\par
+debian              latest              67e34c1c9477        7 days ago          114MB\par
+ubuntu              latest              775349758637        4 weeks ago         64.2MB\par
+fedora              latest              f0858ad3febd        4 weeks ago         194MB\par
+centos              latest              0f3e07c0138f        8 weeks ago         220MB\par
+hello-world         latest              fce289e99eb9        11 months ago       1.84kB\par
+training/webapp     latest              6fae60ef3446        4 years ago         349MB\par
+training/postgres   latest              6fa973bb3c26        5 years ago         365MB\par
+\par
+-bash-4.2$ sudo docker run -it fedora\par
+[root@\cf1\b 2d16ab33f29e \cf0\b0 /]# ls -l\par
+total 0\par
+lrwxrwxrwx.   1 root root   7 Jul 25 00:35 bin -> usr/bin\par
+dr-xr-xr-x.   2 root root   6 Jul 25 00:35 boot\par
+drwxr-xr-x.   5 root root 360 Nov 30 06:54 dev\par
+drwxr-xr-x.   1 root root  66 Nov 30 06:54 etc\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 home\par
+lrwxrwxrwx.   1 root root   7 Jul 25 00:35 lib -> usr/lib\par
+lrwxrwxrwx.   1 root root   9 Jul 25 00:35 lib64 -> usr/lib64\par
+drwx------.   2 root root   6 Oct 28 05:47 lost+found\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 media\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 mnt\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 opt\par
+dr-xr-xr-x. 122 root root   0 Nov 30 06:54 proc\par
+dr-xr-x---.   2 root root 196 Oct 28 05:48 root\par
+drwxr-xr-x.  13 root root 186 Oct 28 05:48 run\par
+lrwxrwxrwx.   1 root root   8 Jul 25 00:35 sbin -> usr/sbin\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 srv\par
+dr-xr-xr-x.  13 root root   0 Nov 30 04:56 sys\par
+drwxrwxrwt.   2 root root  32 Oct 28 05:48 tmp\par
+drwxr-xr-x.  12 root root 144 Oct 28 05:47 usr\par
+drwxr-xr-x.  18 root root 235 Oct 28 05:47 var\par
+[root@2d16ab33f29e /]# exit\par
+exit\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+-bash-4.2$ sudo docker ps -a\par
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                         PORTS               NAMES\par
+2d16ab33f29e        fedora              "/bin/bash"              19 seconds ago      Exited (0) 7 seconds ago                           elated_noether\par
+\par
+\par
+-bash-4.2$ sudo docker rename elated_noether shan_container_fedora\par
+-bash-4.2$\par
+-bash-4.2$ sudo docker start shan_container_fedora\par
+shan_container_fedora\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS               NAMES\par
+2d16ab33f29e        fedora              "/bin/bash"         About a minute ago   Up 9 seconds                            shan_container_fedora\par
+-bash-4.2$ sudo docker attach shan_container_fedora\par
+[root@\cf1\b 2d16ab33f29e \cf0\b0 /]# mkdir testdir\par
+[root@2d16ab33f29e /]# ls -l\par
+total 0\par
+lrwxrwxrwx.   1 root root   7 Jul 25 00:35 bin -> usr/bin\par
+dr-xr-xr-x.   2 root root   6 Jul 25 00:35 boot\par
+drwxr-xr-x.   5 root root 360 Nov 30 06:56 dev\par
+drwxr-xr-x.   1 root root  66 Nov 30 06:54 etc\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 home\par
+lrwxrwxrwx.   1 root root   7 Jul 25 00:35 lib -> usr/lib\par
+lrwxrwxrwx.   1 root root   9 Jul 25 00:35 lib64 -> usr/lib64\par
+drwx------.   2 root root   6 Oct 28 05:47 lost+found\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 media\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 mnt\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 opt\par
+dr-xr-xr-x. 123 root root   0 Nov 30 06:56 proc\par
+dr-xr-x---.   1 root root  27 Nov 30 06:54 root\par
+drwxr-xr-x.  13 root root 186 Oct 28 05:48 run\par
+lrwxrwxrwx.   1 root root   8 Jul 25 00:35 sbin -> usr/sbin\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 srv\par
+dr-xr-xr-x.  13 root root   0 Nov 30 04:56 sys\par
+\cf1\b drwxr-xr-x.   2 root root   6 Nov 30 06:56 testdir\par
+\cf0\b0 drwxrwxrwt.   2 root root  32 Oct 28 05:48 tmp\par
+drwxr-xr-x.  12 root root 144 Oct 28 05:47 usr\par
+drwxr-xr-x.  18 root root 235 Oct 28 05:47 var\par
+[root@2d16ab33f29e /]# exit\par
+exit\par
+-bash-4.2$ sudo docker start shan_container_fedora\par
+shan_container_fedora\par
+-bash-4.2$ sudo docker attach shan_container_fedora\par
+[root@2d16ab33f29e /]# ls -l\par
+total 0\par
+lrwxrwxrwx.   1 root root   7 Jul 25 00:35 bin -> usr/bin\par
+dr-xr-xr-x.   2 root root   6 Jul 25 00:35 boot\par
+drwxr-xr-x.   5 root root 360 Nov 30 06:57 dev\par
+drwxr-xr-x.   1 root root  66 Nov 30 06:54 etc\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 home\par
+lrwxrwxrwx.   1 root root   7 Jul 25 00:35 lib -> usr/lib\par
+lrwxrwxrwx.   1 root root   9 Jul 25 00:35 lib64 -> usr/lib64\par
+drwx------.   2 root root   6 Oct 28 05:47 lost+found\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 media\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 mnt\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 opt\par
+dr-xr-xr-x. 123 root root   0 Nov 30 06:57 proc\par
+dr-xr-x---.   1 root root  27 Nov 30 06:54 root\par
+drwxr-xr-x.  13 root root 186 Oct 28 05:48 run\par
+lrwxrwxrwx.   1 root root   8 Jul 25 00:35 sbin -> usr/sbin\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 srv\par
+dr-xr-xr-x.  13 root root   0 Nov 30 04:56 sys\par
+\cf1\b drwxr-xr-x.   2 root root   6 Nov 30 06:56 testdir\cf0\b0\par
+drwxrwxrwt.   2 root root  32 Oct 28 05:48 tmp\par
+drwxr-xr-x.  12 root root 144 Oct 28 05:47 usr\par
+drwxr-xr-x.  18 root root 235 Oct 28 05:47 var\par
+[root@2d16ab33f29e /]# exit\par
+exit\par
+-bash-4.2$ sudo docker run -it fedora\par
+[root@b2ce8dd88a27 /]# ls -l\par
+total 0\par
+lrwxrwxrwx.   1 root root   7 Jul 25 00:35 bin -> usr/bin\par
+dr-xr-xr-x.   2 root root   6 Jul 25 00:35 boot\par
+drwxr-xr-x.   5 root root 360 Nov 30 06:57 dev\par
+drwxr-xr-x.   1 root root  66 Nov 30 06:57 etc\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 home\par
+lrwxrwxrwx.   1 root root   7 Jul 25 00:35 lib -> usr/lib\par
+lrwxrwxrwx.   1 root root   9 Jul 25 00:35 lib64 -> usr/lib64\par
+drwx------.   2 root root   6 Oct 28 05:47 lost+found\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 media\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 mnt\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 opt\par
+dr-xr-xr-x. 123 root root   0 Nov 30 06:57 proc\par
+dr-xr-x---.   2 root root 196 Oct 28 05:48 root\par
+drwxr-xr-x.  13 root root 186 Oct 28 05:48 run\par
+lrwxrwxrwx.   1 root root   8 Jul 25 00:35 sbin -> usr/sbin\par
+drwxr-xr-x.   2 root root   6 Jul 25 00:35 srv\par
+dr-xr-xr-x.  13 root root   0 Nov 30 04:56 sys\par
+drwxrwxrwt.   2 root root  32 Oct 28 05:48 tmp\par
+drwxr-xr-x.  12 root root 144 Oct 28 05:47 usr\par
+drwxr-xr-x.  18 root root 235 Oct 28 05:47 var\par
+[root@b2ce8dd88a27 /]# exit\par
+exit\par
+-bash-4.2$ sudo docker ps\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+-bash-4.2$ sudo docker ps -a\par
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                      PORTS               NAMES\par
+b2ce8dd88a27        fedora              "/bin/bash"              31 seconds ago      Exited (0) 23 seconds ago                       hopeful_kepler\par
+2d16ab33f29e        fedora              "/bin/bash"              3 minutes ago       Exited (0) 55 seconds ago                       shan_container_fedora\par
+\par
+\cf1\b\fs24 Deleting a container:\par
+\cf0\b0\fs22\par
+-bash-4.2$ sudo docker rm shan_container_fedora\par
+[sudo] password for dockmgr:\par
+shan_container_fedora\par
+-bash-4.2$ sudo docker ps -a | grep -i fedora\par
+b2ce8dd88a27        fedora              "/bin/bash"              8 minutes ago       Exited (0) 8 minutes ago                        hopeful_kepler\par
+-bash-4.2$\par
+\par
+\cf1\b\fs24 Creating container, start & attach:\par
+\par
+\fs22 The docker create command creates a writeable container layer over the specified image and prepares it for running the specified command. The container ID is then printed to STDOUT. This is similar to docker run -d except the container is never started. You can then use the docker start <container_id> command to start the container at any point.\par
+\par
+This is useful when you want to set up a container configuration ahead of time so that it is ready to start when you need it. The initial status of the new container is created.\par
+\cf0\b0\par
+-bash-4.2$ sudo docker create -it --name shan_container centos /bin/bash\par
+0113ebdc09228e632be3799576e3a18ea1b5dec8c5bcefa480baf27c82c969c2\par
+\par
+-bash-4.2$ sudo docker start shan_container\par
+shan_container\par
+-bash-4.2$ sudo docker attach shan_container\par
+[root@0113ebdc0922 /]# ls\par
+bin  dev  etc  home  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var\par
+[root@0113ebdc0922 /]# exit\par
+exit\par
+-bash-4.2$ sudo docker ps -a | more\par
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                      PORTS\par
+           NAMES\par
+0113ebdc0922        centos              "/bin/bash"              3 minutes ago       Exited (0) 5 seconds ago\par
+           shan_container\par
+\par
+\par
+\cf1\b\fs24 Build Custom Image and Run it as container:\par
+\cf0\b0\fs22\par
+\cf1\b The docker build command builds Docker images from a Dockerfile and a \ldblquote context\rdblquote . A build\rquote s context is the set of files located in the specified PATH or URL. The build process can refer to any of the files in the context. Here, the docker image will be created following the steps mentioned in dockerfile. \cf0\b0\par
+\par
+-bash-4.2$ pwd\par
+/home/dockmgr/customimage\par
+-bash-4.2$ ls -la\par
+total 8\par
+drwxr-xr-x. 2 root root  40 Nov 30 08:21 .\par
+drwxr-xr-x. 3 root root  25 Nov 30 07:54 ..\par
+-rw-r--r--. 1 root root 230 Nov 30 08:21 dockerfile\par
+-rwxr-xr-x. 1 root root  22 Nov 30 07:56 hello.py\par
+-bash-4.2$ cat hello.py\par
+print ('hello world')\par
+-bash-4.2$ cat dockerfile\par
+FROM centos:latest\par
+MAINTAINER Shantanu Mukherjee (The guy from hell)\par
+RUN yum update -y\par
+RUN yum install -y python3 python3-pip\par
+ADD hello.py /home/dockmgr/customimage/hello.py\par
+CMD /usr/bin/python3 /home/dockmgr/customimage/hello.py\par
+-bash-4.2$\par
+\par
+-bash-4.2$ sudo docker build -t newcustomimage .\par
+Sending build context to Docker daemon  3.072kB\par
+Step 1/6 : FROM centos:latest\par
+ ---> 0f3e07c0138f\par
+Step 2/6 : MAINTAINER Shantanu Mukherjee (The guy from hell)\par
+ ---> Using cache\par
+ ---> 94df67869637\par
+Step 3/6 : RUN yum update -y\par
+ ---> Using cache\par
+ ---> 4a9978cbf15b\par
+Step 4/6 : RUN yum install -y python3 python3-pip\par
+ ---> Using cache\par
+ ---> 40d870e95e3b\par
+Step 5/6 : ADD hello.py /home/dockmgr/customimage/hello.py\par
+ ---> Using cache\par
+ ---> de97be695628\par
+Step 6/6 : CMD /usr/bin/python3 /home/dockmgr/customimage/hello.py\par
+ ---> Running in e4ae408496e7\par
+Removing intermediate container e4ae408496e7\par
+ ---> 81c09795365b\par
+Successfully built 81c09795365b\par
+Successfully tagged newcustomimage:latest\par
+-bash-4.2$ sudo docker run -it newcustomimage\par
+hello world\par
+\par
+-bash-4.2$ sudo docker logs thirsty_taussig\par
+hello world\par
+\par
+----------------------------------------------------------------\par
+\par
+\par
+\par
+Docker Swarm:\par
+\par
+Creating first service and scale it locally:\par
+\par
+-bash-4.2$ sudo docker swarm init\par
+[sudo] password for dockmgr:\par
+Swarm initialized: current node (tin9tbt7njm2i5uqzuiuxe1ys) is now a manager.\par
+\par
+To add a worker to this swarm, run the following command:\par
+\par
+    docker swarm join --token SWMTKN-1-4m42mygkxfwb13y2b4t5ovtwh2m7prtg2j9dwfflndtp51moek-7wivp9b48c5i8z4m2n81kx9go 192.168.29.10:2377\par
+\par
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.\par
+\par
+-bash-4.2$\par
+\par
+\par
+-bash-4.2$ sudo docker node ls\par
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION\par
+tin9tbt7njm2i5uqzuiuxe1ys *   manager             Ready               Active              Leader              19.03.5\par
+-bash-4.2$\par
+\par
+-bash-4.2$ sudo docker node --help\par
+\par
+Usage:  docker node COMMAND\par
+\par
+Manage Swarm nodes\par
+\par
+Commands:\par
+  demote      Demote one or more nodes from manager in the swarm\par
+  inspect     Display detailed information on one or more nodes\par
+  ls          List nodes in the swarm\par
+  promote     Promote one or more nodes to manager in the swarm\par
+  ps          List tasks running on one or more nodes, defaults to current node\par
+  rm          Remove one or more nodes from the swarm\par
+  update      Update a node\par
+\par
+Run 'docker node COMMAND --help' for more information on a command.\par
+-bash-4.2$ sudo docker swarm --help\par
+\par
+Usage:  docker swarm COMMAND\par
+\par
+Manage Swarm\par
+\par
+Commands:\par
+  ca          Display and rotate the root CA\par
+  init        Initialize a swarm\par
+  join        Join a swarm as a node and/or manager\par
+  join-token  Manage join tokens\par
+  leave       Leave the swarm\par
+  unlock      Unlock swarm\par
+  unlock-key  Manage the unlock key\par
+  update      Update the swarm\par
+\par
+Run 'docker swarm COMMAND --help' for more information on a command.\par
+-bash-4.2$ sudo docker service --help     --- service command are meant to replace the run command on individual containers.\par
+\par
+Usage:  docker service COMMAND\par
+\par
+Manage services\par
+\par
+Commands:\par
+  create      Create a new service\par
+  inspect     Display detailed information on one or more services\par
+  logs        Fetch the logs of a service or task\par
+  ls          List services\par
+  ps          List the tasks of one or more services\par
+  rm          Remove one or more services\par
+  rollback    Revert changes to a service's configuration\par
+  scale       Scale one or multiple replicated services\par
+  update      Update a service\par
+\par
+Run 'docker service COMMAND --help' for more information on a command.\par
+-bash-4.2$\par
+\par
+\par
+-bash-4.2$ docker service create alpine ping 8.8.8.8\par
+kx4pyvq1vr3qymgoao3hng5hg\par
+overall progress: 1 out of 1 tasks\par
+1/1: running   [==================================================>]\par
+verify: Service converged\par
+\par
+-bash-4.2$  docker service ls\par
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS\par
+kx4pyvq1vr3q        eager_kepler        replicated          1/1                 alpine:latest\par
+\par
+-bash-4.2$  docker service ps kx4pyvq1vr3qymgoao3hng5hg\par
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE           ERROR               PORTS\par
+kvcq3wjxko5w        eager_kepler.1      alpine:latest       manager             Running             Running 2 minutes ago \par
+-bash-4.2$ docker service ps eager_kepler\par
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE           ERROR               PORTS\par
+kvcq3wjxko5w        eager_kepler.1      alpine:latest       manager             Running             Running 2 minutes ago \par
+-bash-4.2$ docker container ls\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+ab5ac04ea24a        alpine:latest       "ping 8.8.8.8"      3 minutes ago       Up 3 minutes                            eager_kepler.1.kvcq3wjxko5wcoiw65rjmqrzr\par
+\par
+-bash-4.2$ docker service update eager_kepler --replicas 3\par
+eager_kepler\par
+overall progress: 3 out of 3 tasks\par
+1/3: running   [==================================================>]\par
+2/3: running   [==================================================>]\par
+3/3: running   [==================================================>]\par
+verify: Service converged\par
+-bash-4.2$\par
+\par
+-bash-4.2$ docker service ls\par
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS\par
+kx4pyvq1vr3q        eager_kepler        replicated          3/3                 alpine:latest\par
+\par
+-bash-4.2$ docker service ps kx4pyvq1vr3q\par
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS\par
+kvcq3wjxko5w        eager_kepler.1      alpine:latest       manager             Running             Running 6 minutes ago \par
+ylv2obf7bzu2        eager_kepler.2      alpine:latest       manager             Running             Running 48 seconds ago\par
+scnl0swoglx7        eager_kepler.3      alpine:latest       manager             Running             Running 48 seconds ago\par
+-bash-4.2$\par
+\par
+\par
+-bash-4.2$ docker container ls\par
+CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS               NAMES\par
+2d7a8b7c4823        alpine:latest       "ping 8.8.8.8"      About a minute ago   Up About a minute                       eager_kepler.3.scnl0swoglx76hoctfcnjqgag\par
+9303cd1d8f43        alpine:latest       "ping 8.8.8.8"      About a minute ago   Up About a minute                       eager_kepler.2.ylv2obf7bzu2gayiwu3aizrlz\par
+ab5ac04ea24a        alpine:latest       "ping 8.8.8.8"      7 minutes ago        Up 7 minutes                            eager_kepler.1.kvcq3wjxko5wcoiw65rjmqrzr\par
+-bash-4.2$\par
+\par
+\par
+-bash-4.2$ docker update --help\par
+\par
+Usage:  docker update [OPTIONS] CONTAINER [CONTAINER...]\par
+\par
+Update configuration of one or more containers\par
+\par
+Options:\par
+      --blkio-weight uint16        Block IO (relative weight), between 10 and 1000, or 0 to disable (default 0)\par
+      --cpu-period int             Limit CPU CFS (Completely Fair Scheduler) period\par
+      --cpu-quota int              Limit CPU CFS (Completely Fair Scheduler) quota\par
+      --cpu-rt-period int          Limit the CPU real-time period in microseconds\par
+      --cpu-rt-runtime int         Limit the CPU real-time runtime in microseconds\par
+  -c, --cpu-shares int             CPU shares (relative weight)\par
+      --cpus decimal               Number of CPUs\par
+      --cpuset-cpus string         CPUs in which to allow execution (0-3, 0,1)\par
+      --cpuset-mems string         MEMs in which to allow execution (0-3, 0,1)\par
+      --kernel-memory bytes        Kernel memory limit\par
+  -m, --memory bytes               Memory limit\par
+      --memory-reservation bytes   Memory soft limit\par
+      --memory-swap bytes          Swap limit equal to memory plus swap: '-1' to enable unlimited swap\par
+      --pids-limit int             Tune container pids limit (set -1 for unlimited)\par
+      --restart string             Restart policy to apply when a container exits\par
+\par
+-bash-4.2$ docker service update --help\par
+\par
+Usage:  docker service update [OPTIONS] SERVICE\par
+\par
+Update a service\par
+\par
+Options:\par
+      --args command                       Service command args\par
+      --config-add config                  Add or update a config file on a service\par
+      --config-rm list                     Remove a configuration file\par
+      --constraint-add list                Add or update a placement constraint\par
+      --constraint-rm list                 Remove a constraint\par
+      --container-label-add list           Add or update a container label\par
+      --container-label-rm list            Remove a container label by its key\par
+      --credential-spec credential-spec    Credential spec for managed service account (Windows only)\par
+  -d, --detach                             Exit immediately instead of waiting for the service to converge\par
+      --dns-add list                       Add or update a custom DNS server\par
+      --dns-option-add list                Add or update a DNS option\par
+      --dns-option-rm list                 Remove a DNS option\par
+      --dns-rm list                        Remove a custom DNS server\par
+      --dns-search-add list                Add or update a custom DNS search domain\par
+      --dns-search-rm list                 Remove a DNS search domain\par
+      --endpoint-mode string               Endpoint mode (vip or dnsrr)\par
+      --entrypoint command                 Overwrite the default ENTRYPOINT of the image\par
+      --env-add list                       Add or update an environment variable\par
+      --env-rm list                        Remove an environment variable\par
+      --force                              Force update even if no changes require it\par
+      --generic-resource-add list          Add a Generic resource\par
+      --generic-resource-rm list           Remove a Generic resource\par
+      --group-add list                     Add an additional supplementary user group to the container\par
+      --group-rm list                      Remove a previously added supplementary user group from the container\par
+      --health-cmd string                  Command to run to check health\par
+      --health-interval duration           Time between running the check (ms|s|m|h)\par
+      --health-retries int                 Consecutive failures needed to report unhealthy\par
+      --health-start-period duration       Start period for the container to initialize before counting retries\par
+                                           towards unstable (ms|s|m|h)\par
+      --health-timeout duration            Maximum time to allow one check to run (ms|s|m|h)\par
+      --host-add list                      Add a custom host-to-IP mapping (host:ip)\par
+      --host-rm list                       Remove a custom host-to-IP mapping (host:ip)\par
+      --hostname string                    Container hostname\par
+      --image string                       Service image tag\par
+      --init                               Use an init inside each service container to forward signals and reap\par
+                                           processes\par
+      --isolation string                   Service container isolation mode\par
+      --label-add list                     Add or update a service label\par
+      --label-rm list                      Remove a label by its key\par
+      --limit-cpu decimal                  Limit CPUs\par
+      --limit-memory bytes                 Limit Memory\par
+      --log-driver string                  Logging driver for service\par
+      --log-opt list                       Logging driver options\par
+      --mount-add mount                    Add or update a mount on a service\par
+      --mount-rm list                      Remove a mount by its target path\par
+      --network-add network                Add a network\par
+      --network-rm list                    Remove a network\par
+      --no-healthcheck                     Disable any container-specified HEALTHCHECK\par
+      --no-resolve-image                   Do not query the registry to resolve image digest and supported platforms\par
+      --placement-pref-add pref            Add a placement preference\par
+      --placement-pref-rm pref             Remove a placement preference\par
+      --publish-add port                   Add or update a published port\par
+      --publish-rm port                    Remove a published port by its target port\par
+  -q, --quiet                              Suppress progress output\par
+      --read-only                          Mount the container's root filesystem as read only\par
+      --replicas uint                      Number of tasks\par
+      --replicas-max-per-node uint         Maximum number of tasks per node (default 0 = unlimited)\par
+      --reserve-cpu decimal                Reserve CPUs\par
+      --reserve-memory bytes               Reserve Memory\par
+      --restart-condition string           Restart when condition is met ("none"|"on-failure"|"any")\par
+      --restart-delay duration             Delay between restart attempts (ns|us|ms|s|m|h)\par
+      --restart-max-attempts uint          Maximum number of restarts before giving up\par
+      --restart-window duration            Window used to evaluate the restart policy (ns|us|ms|s|m|h)\par
+      --rollback                           Rollback to previous specification\par
+      --rollback-delay duration            Delay between task rollbacks (ns|us|ms|s|m|h)\par
+      --rollback-failure-action string     Action on rollback failure ("pause"|"continue")\par
+      --rollback-max-failure-ratio float   Failure rate to tolerate during a rollback\par
+      --rollback-monitor duration          Duration after each task rollback to monitor for failure (ns|us|ms|s|m|h)\par
+      --rollback-order string              Rollback order ("start-first"|"stop-first")\par
+      --rollback-parallelism uint          Maximum number of tasks rolled back simultaneously (0 to roll back all\par
+                                           at once)\par
+      --secret-add secret                  Add or update a secret on a service\par
+      --secret-rm list                     Remove a secret\par
+      --stop-grace-period duration         Time to wait before force killing a container (ns|us|ms|s|m|h)\par
+      --stop-signal string                 Signal to stop the container\par
+      --sysctl-add list                    Add or update a Sysctl option\par
+      --sysctl-rm list                     Remove a Sysctl option\par
+  -t, --tty                                Allocate a pseudo-TTY\par
+      --update-delay duration              Delay between updates (ns|us|ms|s|m|h)\par
+      --update-failure-action string       Action on update failure ("pause"|"continue"|"rollback")\par
+      --update-max-failure-ratio float     Failure rate to tolerate during an update\par
+      --update-monitor duration            Duration after each task update to monitor for failure (ns|us|ms|s|m|h)\par
+      --update-order string                Update order ("start-first"|"stop-first")\par
+      --update-parallelism uint            Maximum number of tasks updated simultaneously (0 to update all at once)\par
+  -u, --user string                        Username or UID (format: <name|uid>[:<group|gid>])\par
+      --with-registry-auth                 Send registry authentication details to swarm agents\par
+  -w, --workdir string                     Working directory inside the container\par
+-bash-4.2$\par
+\par
+\par
+removed a conatainer from a service or only running service on 2:\par
+\par
+-bash-4.2$ docker service update eager_kepler --replicas 2\par
+eager_kepler\par
+overall progress: 2 out of 2 tasks\par
+1/2: running   [==================================================>]\par
+2/2: running   [==================================================>]\par
+verify: Service converged\par
+-bash-4.2$ docker node ls\par
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION\par
+tin9tbt7njm2i5uqzuiuxe1ys *   manager             Ready               Active              Leader              19.03.5\par
+-bash-4.2$ docker service ps kx4pyvq1vr3q\par
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS\par
+kvcq3wjxko5w        eager_kepler.1      alpine:latest       manager             Running             Running 12 minutes ago\par
+ylv2obf7bzu2        eager_kepler.2      alpine:latest       manager             Running             Running 6 minutes ago \par
+-bash-4.2$ docker service ls\par
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS\par
+kx4pyvq1vr3q        eager_kepler        replicated          2/2                 alpine:latest\par
+-bash-4.2$\par
+\par
+\par
+-bash-4.2$ docker service update eager_kepler --replicas 3\par
+eager_kepler\par
+overall progress: 3 out of 3 tasks\par
+1/3: running   [==================================================>]\par
+2/3: running   [==================================================>]\par
+3/3: running   [==================================================>]\par
+verify: Service converged\par
+-bash-4.2$\par
+-bash-4.2$\par
+-bash-4.2$ docker service ls\par
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS\par
+kx4pyvq1vr3q        eager_kepler        replicated          3/3                 alpine:latest\par
+-bash-4.2$ docker service ps kx4pyvq1vr3q\par
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS\par
+kvcq3wjxko5w        eager_kepler.1      alpine:latest       manager             Running             Running 13 minutes ago\par
+ylv2obf7bzu2        eager_kepler.2      alpine:latest       manager             Running             Running 7 minutes ago \par
+lpjuegqpootu        eager_kepler.3      alpine:latest       manager             Running             Running 14 seconds ago\par
+-bash-4.2$ docker container ls\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+10ce88501898        alpine:latest       "ping 8.8.8.8"      56 seconds ago      Up 54 seconds                           eager_kepler.3.lpjuegqpootuzmlk7yx6r6qb0\par
+9303cd1d8f43        alpine:latest       "ping 8.8.8.8"      8 minutes ago       Up 8 minutes                            eager_kepler.2.ylv2obf7bzu2gayiwu3aizrlz\par
+ab5ac04ea24a        alpine:latest       "ping 8.8.8.8"      14 minutes ago      Up 14 minutes                           eager_kepler.1.kvcq3wjxko5wcoiw65rjmqrzr\par
+-bash-4.2$ docker container rm -f eager_kepler.3.lpjuegqpootuzmlk7yx6r6qb0\par
+eager_kepler.3.lpjuegqpootuzmlk7yx6r6qb0\par
+-bash-4.2$ docker service ls\par
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS\par
+kx4pyvq1vr3q        eager_kepler        replicated          2/3                 alpine:latest\par
+-bash-4.2$ docker service ls\par
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS\par
+kx4pyvq1vr3q        eager_kepler        replicated          3/3                 alpine:latest\par
+\par
+\par
+\par
+-bash-4.2$ docker service ps kx4pyvq1vr3q\par
+ID                  NAME                 IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR                         PORTS\par
+kvcq3wjxko5w        eager_kepler.1       alpine:latest       manager             Running             Running 15 minutes ago\par
+ylv2obf7bzu2        eager_kepler.2       alpine:latest       manager             Running             Running 9 minutes ago\par
+dvznv58u7mp3        eager_kepler.3       alpine:latest       manager             Running             Running 14 seconds ago\par
+lpjuegqpootu         \\_ eager_kepler.3   alpine:latest       manager             Shutdown            Failed 20 seconds ago    "task: non-zero exit (137)"\par
+-bash-4.2$\par
+\par
+\par
+removing a service:\par
+\par
+-bash-4.2$ docker service rm eager_kepler\par
+eager_kepler\par
+\par
+-bash-4.2$ docker service ps eager_kepler\par
+no such service: eager_kepler\par
+-bash-4.2$ docker service ls\par
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS\par
+-bash-4.2$ docker container ls\par
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES\par
+-bash-4.2$\par
+\par
+\par
+\par
+2 worker and 1 manager:\par
+\par
+-bash-4.2$ docker swarm leave --force\par
+Node left the swarm.\par
+-bash-4.2$ docker swarm init --advertise-addr 192.168.29.10\par
+Swarm initialized: current node (xbeg74fats90fzqon53tbxkvy) is now a manager.\par
+\par
+To add a worker to this swarm, run the following command:\par
+\par
+    docker swarm join --token SWMTKN-1-5avo757psfcbtiit3u287w4xcmdfc2b0w6xq71lvsm9udg82y2-2jk3w9wblb3gh6v7efnvnakny 192.168.29.10:2377\par
+\par
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.\par
+\par
+-bash-4.2$ docker node ls\par
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION\par
+xbeg74fats90fzqon53tbxkvy *   manager             Ready               Active              Leader              19.03.5\par
+\par
+\par
+[worker@worker1 ~]$ docker swarm join --token SWMTKN-1-5avo757psfcbtiit3u287w4xcmdfc2b0w6xq71lvsm9udg82y2-2jk3w9wblb3gh6v7efnvnakny 192.168.29.10:2377\par
+Error response from daemon: rpc error: code = Unavailable desc = all SubConns are in TransientFailure, latest connection error: connection error: desc = "transport: Error while dialing dial tcp 192.168.29.10:2377: connect: no route to host"\par
+[root@manager ~]# systemctl stop firewalld.service\par
+[root@manager ~]# systemctl disable firewalld.service\par
+Removed symlink /etc/systemd/system/multi-user.target.wants/firewalld.service.\par
+Removed symlink /etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service.\par
+\par
+-bash-4.2$ docker swarm join-token worker\par
+To add a worker to this swarm, run the following command:\par
+\par
+    docker swarm join --token SWMTKN-1-5avo757psfcbtiit3u287w4xcmdfc2b0w6xq71lvsm9udg82y2-2jk3w9wblb3gh6v7efnvnakny 192.168.29.10:2377\par
+\par
+\par
+\par
+[root@worker1 ~]# systemctl stop firewalld.service\par
+[root@worker1 ~]# systemctl disable firewalld.service\par
+Removed symlink /etc/systemd/system/multi-user.target.wants/firewalld.service.\par
+Removed symlink /etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service.\par
+[root@worker1 ~]# su - worker\par
+Last login: Mon Dec  2 01:23:00 EST 2019 on pts/0\par
+[worker@worker1 ~]$ docker swarm join --token SWMTKN-1-5avo757psfcbtiit3u287w4xcmdfc2b0w6xq71lvsm9udg82y2-2jk3w9wblb3gh6v7efnvnakny 192.168.29.10:2377\par
+This node joined a swarm as a worker.\par
+[worker@worker1 ~]$\par
+\par
+\par
+[root@worker2 ~]# systemctl stop firewalld.service\par
+[root@worker2 ~]# systemctl disable firewalld.service\par
+Removed symlink /etc/systemd/system/multi-user.target.wants/firewalld.service.\par
+Removed symlink /etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service.\par
+[root@worker2 ~]# su - worker\par
+Last login: Mon Dec  2 01:23:15 EST 2019 on pts/0\par
+[worker@worker2 ~]$ docker swarm join --token SWMTKN-1-5avo757psfcbtiit3u287w4xcmdfc2b0w6xq71lvsm9udg82y2-2jk3w9wblb3gh6v7efnvnakny 192.168.29.10:2377\par
+This node joined a swarm as a worker.\par
+[worker@worker2 ~]$\par
+\par
+-bash-4.2$ docker node ls\par
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION\par
+xbeg74fats90fzqon53tbxkvy *   manager             Ready               Active              Leader              19.03.5\par
+mbtsbjmmpb6y0tclrqm7s621f     worker1             Ready               Active                                  19.03.5\par
+p5k4qztbwe92rmq1ygdu9vqkk     worker2             Ready               Active                                  19.03.5\par
+-bash-4.2$\par
+\par
+\par
+https://rominirani.com/docker-swarm-tutorial-b67470cf8872\par
+\par
+\par
+\par
+\par
+}
+ 
