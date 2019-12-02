@@ -1,0 +1,56 @@
+Pre-requisites:
+
+1. All the systems where you are going to install docker engine or docker components should be able to ping google.com
+2. The DNS must be set to 8.8.8.8
+3. The systems must have static IP address and it's good to be in same subnet, so that each system can communicate to other.
+4. Update the /etc/hosts with hosts detail on each server.
+5. The docker user (user which will run the docker commands) must be the part of admin group (you can make it a part of wheel).
+
+
+Install using the repository
+
+SET UP THE REPOSITORY
+
+1. Install required packages. yum-utils provides the yum-config-manager utility, and device-mapper-persistent-data and lvm2 are required by the devicemapper storage driver.
+
+$ yum install -y yum-utils device-mapper-persistent-data lvm2
+
+2. Use the following command to set up the stable repository.
+
+$ yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+3. Install the latest version of Docker Engine - Community and containerd, or go to the next step to install a specific version:
+
+$ yum install docker-ce docker-ce-cli containerd.io
+
+
+Start and enable Docker.
+
+systemctl start docker
+systemctl enable docker
+
+
+Installing docker-compose:
+
+[worker@worker2 ~]$ sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   617    0   617    0     0    951      0 --:--:-- --:--:-- --:--:--   952
+100 16.2M  100 16.2M    0     0  1120k      0  0:00:14  0:00:14 --:--:-- 3013k
+[worker@worker2 ~]$ sudo chmod +x /usr/local/bin/docker-compose
+[worker@worker2 ~]$ docker-compose --version
+docker-compose version 1.25.0, build 0a186604
+
+
+
+Uninstallation:
+
+1. Uninstall the Docker package:
+
+$ sudo yum remove docker-ce
+
+2. Images, containers, volumes, or customized configuration files on your host are not automatically removed. To delete all images, containers, and volumes:
+
+$ sudo rm -rf /var/lib/docker
+
+You must delete any edited configuration files manually.
