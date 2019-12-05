@@ -1,0 +1,17 @@
+Exporting Environment Variable:
+
+
+docker run -e APP_COLOR=blue simple-webapp-color
+docker run -e APP_COLOR=red simple-webapp-color
+docker run -e APP_COLOR=green simple-webapp-color
+
+From a docker-compose.yml file:
+
+version: '3'
+
+services:
+  plex:
+    image: linuxserver/plex
+      environment:
+        - env_var_name=another_value
+

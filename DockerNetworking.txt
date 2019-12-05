@@ -1,0 +1,806 @@
+Explaining Docker Networking:
+
+Docker networking is basically used to establish communication between the docker containers and the outside world via host machine or you can say it is a communication passage through which all the isolated containers communicate with each other in various situations to perform the required actions.
+
+
+$ docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+1e7eb2ce06c4        bridge              bridge              local
+0bd2dafc4022        host                host                local
+b33b166e9192        none                null                local
+
+docker network create --driver bridge --subnet 182.18.0.0/16 custom-isolated-network
+
+
+docker network create --driver overlay mydrupal
+
+[node1] (local) root@192.168.0.33 ~
+$ docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+8bdee88b63b6        bridge              bridge              local
+8e2cc90d6f06        docker_gwbridge     bridge              local
+a55f51c1ce5d        host                host                local
+vdhfxgtxv3pd        ingress             overlay             swarm
+zrb29ecfe071        mydrupal            overlay             swarm
+f2afc30a8a95        none                null                local
+
+docker swarm init --advertise-addr=192.168.0.33
+
+
+[node1] (local) root@192.168.0.33 ~
+$ docker swarm join-token worker
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-39vmp5skv2i77qobhtb6mbq6vxv2cyg9q4uo4pkdi0kac5xizq-9ui3vd9h144b7ujdx5xov2h2h 192.168.0.33:2377
+
+[node1] (local) root@192.168.0.33 ~
+$ 
+
+Joined worker1/2/3
+
+[node2] (local) root@192.168.0.32 ~
+$ docker swarm join --token SWMTKN-1-39vmp5skv2i77qobhtb6mbq6vxv2cyg9q4uo4pkdi0kac5xizq-9ui3vd9h144b7ujdx5xov2h2h 192.168.0.33:2377
+This node joined a swarm as a worker.
+[node2] (local) root@192.168.0.32 ~
+
+
+docker service create --name psql --network mydrupal -e POSTGRES_PASSWORD=mypass postgres
+
+[node1] (local) root@192.168.0.33 ~
+$ docker service ps psql
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE                ERROR               PORTS
+2a3ppoqh8puf        psql.1              postgres:latest     node3               Running             Running about a minute ago                       
+[node1] (local) root@192.168.0.33 ~
+$ 
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+n4kqi7svodek        psql                replicated          1/1                 postgres:latest     
+[node1] (local) root@192.168.0.33 ~
+$ 
+[node1] (local) root@192.168.0.33 ~
+$ docker service create --name mydrupal --network mydrupal -p 80:80 drupal
+l6f25rvcr4ms2a2jiauo48vr1
+overall progress: 1 out of 1 tasks 
+1/1: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.33 ~
+$ 
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+l6f25rvcr4ms        mydrupal            replicated          1/1                 drupal:latest       *:80->80/tcp
+n4kqi7svodek        psql                replicated          1/1                 postgres:latest     
+[node1] (local) root@192.168.0.33 ~
+$ docker service ps mydrupal
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+t4fwp5j8xkn8        mydrupal.1          drupal:latest       node4               Running             Running 40 seconds ago                       
+[node1] (local) root@192.168.0.33 ~
+$ 
+
+
+[node1] (local) root@192.168.0.33 ~
+$ docker service create --name search --replicas 3 -p 9200:9200 elasticsearch:2
+i9ap1f82slrdjebt5ddxhnq97
+overall progress: 3 out of 3 tasks 
+1/3: running   [==================================================>] 
+2/3: running   [==================================================>] 
+3/3: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.33 ~
+$ docker service ps search
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+1mr9lzs7le3o        search.1            elasticsearch:2     node2               Running             Running 15 seconds ago                       
+bpqg0iuw5mkf        search.2            elasticsearch:2     node1               Running             Running 18 seconds ago                       
+elsu3f3p8lbb        search.3            elasticsearch:2     node3               Running             Running 17 seconds ago                       
+[node1] (local) root@192.168.0.33 ~
+$ curl -v localhost:9200
+*   Trying 127.0.0.1:9200...
+* TCP_NODELAY set
+* Connected to localhost (127.0.0.1) port 9200 (#0)
+> GET / HTTP/1.1
+> Host: localhost:9200
+> User-Agent: curl/7.66.0
+> Accept: */*
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=UTF-8
+< Content-Length: 358
+< iojhkhjhjhjhjkjhi
+{
+  "name" : "Gaea",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "fBSMJVKmRQeVVzLOzNN1KQ",
+  "version" : {
+    "number" : "2.4.6",
+    "build_hash" : "5376dca9f70f3abef96a77f4bb22720ace8240fd",
+    "build_timestamp" : "2017-07-18T12:17:44Z",
+    "build_snapshot" : false,
+    "lucene_version" : "5.5.4"
+  },
+  "tagline" : "You Know, for Search"
+}
+* Connection #0 to host localhost left intact
+[node1] (local) root@192.168.0.33 ~
+$ curl -v localhost:9200
+*   Trying 127.0.0.1:9200...
+* TCP_NODELAY set
+* Connected to localhost (127.0.0.1) port 9200 (#0)
+> GET / HTTP/1.1
+> Host: localhost:9200
+> User-Agent: curl/7.66.0
+> Accept: */*
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=UTF-8
+< Content-Length: 358
+< 
+{
+  "name" : "Amun",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "jfy_JGVkRoKYCnJwCsA2Zw",
+  "version" : {
+    "number" : "2.4.6",
+    "build_hash" : "5376dca9f70f3abef96a77f4bb22720ace8240fd",
+    "build_timestamp" : "2017-07-18T12:17:44Z",
+    "build_snapshot" : false,
+    "lucene_version" : "5.5.4"
+  },
+  "tagline" : "You Know, for Search"
+}
+* Connection #0 to host localhost left intact
+[node1] (local) root@192.168.0.33 ~
+$ curl -v localhost:9200
+*   Trying 127.0.0.1:9200...
+* TCP_NODELAY set
+* Connected to localhost (127.0.0.1) port 9200 (#0)
+> GET / HTTP/1.1
+> Host: localhost:9200
+> User-Agent: curl/7.66.0
+> Accept: */*
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=UTF-8
+< Content-Length: 367
+< 
+{
+  "name" : "Randall Shire",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "Eb4QUFg_SPKeaAaguF_64w",
+  "version" : {
+    "number" : "2.4.6",
+    "build_hash" : "5376dca9f70f3abef96a77f4bb22720ace8240fd",
+    "build_timestamp" : "2017-07-18T12:17:44Z",
+    "build_snapshot" : false,
+    "lucene_version" : "5.5.4"
+  },
+  "tagline" : "You Know, for Search"
+}
+* Connection #0 to host localhost left intact
+[node1] (local) root@192.168.0.33 ~
+$ curl -v localhost:9200
+*   Trying 127.0.0.1:9200...
+* TCP_NODELAY set
+* Connected to localhost (127.0.0.1) port 9200 (#0)
+> GET / HTTP/1.1
+> Host: localhost:9200
+> User-Agent: curl/7.66.0
+> Accept: */*
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Content-Type: application/json; charset=UTF-8
+< Content-Length: 358
+< 
+{
+  "name" : "Gaea",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "fBSMJVKmRQeVVzLOzNN1KQ",
+  "version" : {
+    "number" : "2.4.6",
+    "build_hash" : "5376dca9f70f3abef96a77f4bb22720ace8240fd",
+    "build_timestamp" : "2017-07-18T12:17:44Z",
+    "build_snapshot" : false,
+    "lucene_version" : "5.5.4"
+  },
+  "tagline" : "You Know, for Search"
+}
+* Connection #0 to host localhost left intact
+[node1] (local) root@192.168.0.33 ~
+$ 
+
+
+
+Stacks: Production Grade Compose - Meant for prodcution environment
+
+1. In 1.13 Docker adds a new layer of abstraction to Swarm called Stacks.
+2. Stacks accept Compose files as their declarative definition for services, networks and volumes. 
+3. We use "docker stack deploy" rather than docker service create.
+4. Stacks manages all those objects for us, including overlay network per stack.
+Add stack name to start of their name.
+5. New deploy: key in Compose file. Can't do build.
+6. Compose now ignores deploy, and swarm ignores build.
+7. docker-compose cli not needed on swarm server.
+
+[node1] (local) root@192.168.0.33 ~
+$ mkdir voting-app
+[node1] (local) root@192.168.0.33 ~
+$ cd voting-app/
+[node1] (local) root@192.168.0.33 ~/voting-app
+$ git clone https://github.com/shaan2212/example-voting-app.git
+Cloning into 'example-voting-app'...
+remote: Enumerating objects: 832, done.
+remote: Total 832 (delta 0), reused 0 (delta 0), pack-reused 832
+Receiving objects: 100% (832/832), 950.35 KiB | 11.59 MiB/s, done.
+Resolving deltas: 100% (293/293), done.
+[node1] (local) root@192.168.0.33 ~/voting-app
+$ pwd
+/root/voting-app
+
+
+
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ pwd
+/root/voting-app/example-voting-app
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ ls
+ExampleVotingApp.sln             docker-compose-javaworker.yml    docker-stack-simple.yml          result
+Jenkinsfile                      docker-compose-k8s.yml           docker-stack-windows-1809.yml    vote
+LICENSE                          docker-compose-simple.yml        docker-stack-windows.yml         worker
+MAINTAINERS                      docker-compose-windows-1809.yml  docker-stack.yml
+README.md                        docker-compose-windows.yml       k8s-specifications
+architecture.png                 docker-compose.yml               kube-deployment.yml
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ 
+
+##### -c is for compose
+
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ docker stack deploy -c docker-stack.yml voteapp
+this node is not a swarm manager. Use "docker swarm init" or "docker swarm join" to connect this node to swarm and try again
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ ip r
+default via 172.18.0.1 dev eth1 
+172.17.0.0/16 dev docker0 scope link  src 172.17.0.1 
+172.18.0.0/16 dev eth1 scope link  src 172.18.0.66 
+192.168.0.0/23 dev eth0 scope link  src 192.168.0.33 
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ docker swarm init --advertise-addr=192.168.0.33
+Swarm initialized: current node (21ods37s7bfdoiturtan1f9h0) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-0bdxnckoq9fibbw7fquujg0ityzlyy5zkmnd6d3oijr0qfzgqm-9uwd4xrspest66uog48omhnrd 192.168.0.33:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ docker stack deploy -c docker-stack.yml voteapp
+Creating network voteapp_backend
+Creating network voteapp_default
+Creating network voteapp_frontend
+Creating service voteapp_worker
+Creating service voteapp_visualizer
+Creating service voteapp_redis
+Creating service voteapp_db
+Creating service voteapp_vote
+Creating service voteapp_result
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ docker stack ps voteapp
+ID                  NAME                   IMAGE                                          NODE                DESIRED STATE       CURRENT STATE                ERROR               PORTS
+okyt0havp93m        voteapp_result.1       dockersamples/examplevotingapp_result:before   node2               Running             Running about a minute ago                       
+dw14667fussp        voteapp_vote.1         dockersamples/examplevotingapp_vote:before     node3               Running             Running about a minute ago                       
+rinvcl97kbv9        voteapp_db.1           postgres:9.4                                   node1               Running             Running about a minute ago                       
+jl59f6j9l8xt        voteapp_redis.1        redis:alpine                                   node3               Running             Running about a minute ago                       
+y5lodscys0y1        voteapp_visualizer.1   dockersamples/visualizer:stable                node1               Running             Running 54 seconds ago                           
+q2ql6bg7vi7d        voteapp_worker.1       dockersamples/examplevotingapp_worker:latest   node1               Running             Running 27 seconds ago                           
+re55uk20xbih        voteapp_vote.2         dockersamples/examplevotingapp_vote:before     node2               Running             Running about a minute ago                       
+
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ docker stack services voteapp
+ID                  NAME                 MODE                REPLICAS            IMAGE                                          PORTS
+83q0duu3rv6t        voteapp_db           replicated          1/1                 postgres:9.4                                   
+lm1iv13hou0i        voteapp_worker       replicated          1/1                 dockersamples/examplevotingapp_worker:latest   
+lsufx9579wvd        voteapp_vote         replicated          2/2                 dockersamples/examplevotingapp_vote:before     *:5000->80/tcp
+q5zjvjofgrfk        voteapp_visualizer   replicated          1/1                 dockersamples/visualizer:stable                *:8080->8080/tcp
+tckvnqufsvv3        voteapp_redis        replicated          1/1                 redis:alpine                                   
+whftngi7om07        voteapp_result       replicated          1/1                 dockersamples/examplevotingapp_result:before   *:5001->80/tcp
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ 
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ docker container ls
+CONTAINER ID        IMAGE                                          COMMAND                  CREATED             STATUS              PORTS               NAMES
+97cdd46fc21e        dockersamples/examplevotingapp_worker:latest   "/bin/sh -c 'dotnet …"   2 minutes ago       Up 2 minutes                            voteapp_worker.1.q2ql6bg7vi7d4y7146y1ee3gb
+5d5a5a27536f        dockersamples/visualizer:stable                "npm start"              3 minutes ago       Up 3 minutes        8080/tcp            voteapp_visualizer.1.y5lodscys0y1v02paahrowvhh
+d881f2ae4979        postgres:9.4                                   "docker-entrypoint.s…"   3 minutes ago       Up 3 minutes        5432/tcp            voteapp_db.1.rinvcl97kbv9jqm8ocz1n2yl8
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ 
+
+$ docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+0743bda4c7d5        bridge              bridge              local
+65d10124d285        docker_gwbridge     bridge              local
+630e6e4a1f07        host                host                local
+brv86qf0pos3        ingress             overlay             swarm
+9ed2bd6d014e        none                null                local
+tpm1qrrfcyms        voteapp_backend     overlay             swarm
+94q0jvwu6bpe        voteapp_default     overlay             swarm
+lho2xis7m8cj        voteapp_frontend    overlay             swarm
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+
+
+$ cat docker-stack.yml | grep -Ei 'vote|replicas'
+      replicas: 1
+  vote:
+    image: dockersamples/examplevotingapp_vote:before
+      replicas: 6
+      replicas: 1
+      replicas: 1
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ 
+
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ docker stack deploy -c docker-stack.yml voteapp
+Updating service voteapp_result (id: whftngi7om07zse0dx0tdv8qm)
+Updating service voteapp_worker (id: lm1iv13hou0irkag1z4he353k)
+Updating service voteapp_visualizer (id: q5zjvjofgrfkp8xht8c8a2g4b)
+Updating service voteapp_redis (id: tckvnqufsvv3p1x743x1gmkwp)
+Updating service voteapp_db (id: 83q0duu3rv6tbt0mn7idc4mub)
+Updating service voteapp_vote (id: lsufx9579wvdsu3qaw0kfodd3)
+[node1] (local) root@192.168.0.33 ~/voting-app/example-voting-app
+$ 
+
+
+
+
+secrets in swarm services:
+
+
+
+Docker secrets:
+https://docs.docker.com/compose/compose-file/
+
+
+
+
+[node1] (local) root@192.168.0.48 ~
+$ vi psql_user.txt
+[node1] (local) root@192.168.0.48 ~
+$ ls -l
+total 4
+-rw-r--r--    1 root     root            11 Dec  5 09:06 psql_user.txt
+[node1] (local) root@192.168.0.48 ~
+ 
+[node1] (local) root@192.168.0.48 ~
+$ docker secret create psql_user psql_user.txt
+byy4t9quhze5szjbc80bhom0h
+
+[node1] (local) root@192.168.0.48 ~
+$ docker secret ls
+ID                          NAME                DRIVER              CREATED             UPDATED
+byy4t9quhze5szjbc80bhom0h   psql_user                               7 seconds ago       7 seconds ago
+
+[node1] (local) root@192.168.0.48 ~
+$ echo "myDBpassword" | docker secret create psql_pass -
+bxo4wjfzu2zhd2q4ta27svulg
+
+[node1] (local) root@192.168.0.48 ~
+$ docker secret ls
+ID                          NAME                DRIVER              CREATED              UPDATED
+bxo4wjfzu2zhd2q4ta27svulg   psql_pass                               5 seconds ago        5 seconds ago
+byy4t9quhze5szjbc80bhom0h   psql_user                               About a minute ago   About a minute ago
+
+[node1] (local) root@192.168.0.48 ~
+$ docker service create --name psql --secret psql_user --secret psql_pass -e POSTGRES_PASSWORD_FILE="/run/secrets/psql_pass" -e POSTGRES_USER_FILE="/run/secrets/psql_user" postgres:10
+ytaihypssd284n5hgwrrco03p
+overall progress: 1 out of 1 tasks 
+1/1: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.48 ~
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+ytaihypssd28        psql                replicated          1/1                 postgres:10         
+[node1] (local) root@192.168.0.48 ~
+$ 
+
+
+[node1] (local) root@192.168.0.48 ~
+$ docker container ls
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+b47ad0fab13e        postgres:10         "docker-entrypoint.s…"   2 minutes ago       Up 2 minutes        5432/tcp            psql.1.2eq4lnmgtxwtt95sfdb5kl8tc
+[node1] (local) root@192.168.0.48 ~
+$ docker exec -it psql.1.2eq4lnmgtxwtt95sfdb5kl8tc /bin/bash
+root@b47ad0fab13e:/# 
+root@b47ad0fab13e:/# 
+root@b47ad0fab13e:/# ls -l /var/run/secrets
+total 8
+-r--r--r-- 1 root root 13 Dec  5 11:36 psql_pass
+-r--r--r-- 1 root root 11 Dec  5 11:36 psql_user
+root@b47ad0fab13e:/# cat psql_pass
+cat: psql_pass: No such file or directory
+root@b47ad0fab13e:/# cat /var/run/secrets/psql_user 
+mypsqluser
+root@b47ad0fab13e:/# cat /var/run/secrets/psql_pass 
+myDBpassword
+root@b47ad0fab13e:/# 
+
+in single step, we can use the filter command on docker container ls as below:
+
+$ docker exec -it $(docker container ls --filter=name=psql.1.pljpjdv1gfw5cjj391hp5gocx -q) cat /var/run/secrets/psql_user /var/run/secrets/psql_pass
+mypsqluser
+myDBpassword
+[node1] (local) root@192.168.0.48 ~
+$ 
+
+
+Removing and Adding Secrets:
+
+$ docker service update --secret-rm psql_pass psql
+psql
+overall progress: 1 out of 1 tasks 
+1/1: running   [==================================================>] 
+verify: Waiting 5 seconds to verify that tasks are stable... 
+service update paused: update paused due to failure or early termination of task uf5d81gn9fwar7tc3ck2rzk7v
+[node1] (local) root@192.168.0.48 ~
+$ docker logs -f uf5d81gn9fwar7tc3ck2rzk7v
+Error: No such container: uf5d81gn9fwar7tc3ck2rzk7v
+[node1] (local) root@192.168.0.48 ~
+$ docker logs -f psql
+Error: No such container: psql
+[node1] (local) root@192.168.0.48 ~
+$ docker service update --secret-add psql_pass psql
+psql
+overall progress: 1 out of 1 tasks 
+1/1: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.48 ~
+$ docker service ps psql
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE             ERROR                       PORTS
+pljpjdv1gfw5        psql.1              postgres:10         node1               Running             Running 13 seconds ago                                
+rcqrflg3ys2l         \_ psql.1          postgres:10         node3               Shutdown            Shutdown 14 seconds ago                               
+rtj2adwcbvqd         \_ psql.1          postgres:10         node3               Shutdown            Failed 17 seconds ago     "task: non-zero exit (1)"   
+tt6bnrapsuqc         \_ psql.1          postgres:10         node2               Shutdown            Failed 23 seconds ago     "task: non-zero exit (1)"   
+jvm6bru9has1         \_ psql.1          postgres:10         node2               Shutdown            Failed 29 seconds ago     "task: non-zero exit (1)"   
+[node1] (local) root@192.168.0.48 ~
+$ 
+
+Stack Deployment with Secrets:
+
+
+[node1] (local) root@192.168.0.48 ~/stack_secret
+$ pwd
+/root/stack_secret
+[node1] (local) root@192.168.0.47 ~
+$ ls -l
+total 12
+-rw-r--r--    1 root     root           330 Dec  5 13:12 docker-compose.yml
+-rw-r--r--    1 root     root            11 Dec  5 13:05 psql_pass.txt
+-rw-r--r--    1 root     root            11 Dec  5 12:56 psql_user.txt
+$ 
+
+[node1] (local) root@192.168.0.47 ~
+$ cat docker-compose.yml
+version: "3.1"
+
+services:
+    psql:
+      image: postgres
+      secrets:
+          - psql_user
+          - psql_pass
+      environment:
+           POSTGRES_PASSWORD_FILE: /run/secrets/psql_pass
+           POSTGRES_USER_FILE: /run/secrets/psql_user
+secrets:
+  psql_user:
+     file: ./psql_user.txt
+  psql_pass:
+     file: ./psql_pass.txt
+
+
+[node1] (local) root@192.168.0.47 ~
+$ docker stack deploy -c docker-compose.yml mydb
+Creating network mydb_default
+Creating secret mydb_psql_pass
+Creating secret mydb_psql_user
+Creating service mydb_psql
+
+
+$ docker stack services mydb
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+siljsp552khq        mydb_psql           replicated          1/1                 postgres:latest     
+
+$ docker container ls
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+50424ddde5e8        postgres:latest     "docker-entrypoint.s…"   2 minutes ago       Up 2 minutes        5432/tcp            mydb_psql.1.zajk5nzb2f8wsuu387qdlh6w1
+[node1] (local) root@192.168.0.47 ~
+$ 
+
+[node1] (local) root@192.168.0.47 ~
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+siljsp552khq        mydb_psql           replicated          1/1                 postgres:latest     
+
+==============================
+Using manually created secret key.. 
+
+$ cat docker-compose.yml
+version: "3.1"
+
+services:
+    psql:
+      image: postgres
+      secrets:
+          - psql_user
+          - psql_pass
+      environment:
+           POSTGRES_PASSWORD_FILE: /run/secrets/psql_pass
+           POSTGRES_USER_FILE: /run/secrets/psql_user
+secrets:
+  psql_user:
+     file: ./psql_user.txt
+  psql_pass:
+     external: true
+
+
+[node1] (local) root@192.168.0.47 ~
+$ docker stack deploy -c docker-compose.yml shaan_db
+Creating network shaan_db_default
+Creating secret shaan_db_psql_user
+Creating service shaan_db_psql
+
+[node1] (local) root@192.168.0.47 ~
+$ docker secret ls
+ID                          NAME                 DRIVER              CREATED             UPDATED
+ng2dvoba0rgej3a15wk3h70lk   mydb_psql_pass                           9 minutes ago       9 minutes ago
+ub16w99vumayn9byti2xd4a6j   mydb_psql_user                           9 minutes ago       6 minutes ago
+rnepvx0rity1obcpdjwz5etww   psql_pass                                20 minutes ago      20 minutes ago
+ymk7abjzm9k1cl4mkjwlnat4h   psql_user                                22 minutes ago      22 minutes ago
+w791noqa5uams9nediirbrpdp   shaan_db_psql_user                       4 minutes ago       4 minutes ago
+
+
+$ 
+[node1] (local) root@192.168.0.47 ~
+$ docker stack services shaan_db
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+85apa2295g3z        shaan_db_psql       replicated          1/1                 postgres:latest     
+[node1] (local) root@192.168.0.47 ~
+$ 
+
+$ docker container ls
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+50424ddde5e8        postgres:latest     "docker-entrypoint.s…"   11 minutes ago      Up 11 minutes       5432/tcp            mydb_psql.1.zajk5nzb2f8wsuu387qdlh6w1
+[node1] (local) root@192.168.0.47 ~
+$ 
+
+
+=====================================++++++++++++++++++++++++==============================================
+Using Secrets with local docker-compose:
+
+use of external here is not possible, it will read the data only from a file.
+
+[node1] (local) root@192.168.0.48 ~
+$ echo "mysqluser" >> psql_user.txt
+[node1] (local) root@192.168.0.48 ~
+$ echo "mysqlpass" >> psql_pass.txt
+[node1] (local) root@192.168.0.48 ~
+$ vi docker-compose.yml
+$ cat 
+$ 
+[node1] (local) root@192.168.0.48 ~
+$ ls -l
+total 12
+-rw-r--r--    1 root     root           337 Dec  5 14:32 docker-compose.yml
+-rw-r--r--    1 root     root            10 Dec  5 14:31 psql_pass.txt
+-rw-r--r--    1 root     root            10 Dec  5 14:31 psql_user.txt
+
+[node1] (local) root@192.168.0.48 ~
+$ cat docker-compose.yml
+version: "3.1"
+
+services:
+    psql:
+      image: postgres
+      secrets:
+          - psql_user
+          - psql_pass
+      environment:
+           POSTGRES_PASSWORD_FILE: /run/secrets/psql_pass
+           POSTGRES_USER_FILE: /run/secrets/psql_user
+secrets:
+  psql_user:
+     file: ./psql_user.txt
+  psql_pass:
+     file: ./psql_pass.txt
+
+[node1] (local) root@192.168.0.48 ~
+
+$ docker-compose up -d
+Creating network "root_default" with the default driver
+Pulling psql (postgres:)...
+latest: Pulling from library/postgres
+000eee12ec04: Pull complete
+7b8ef50e8d64: Pull complete
+304f7c67e7db: Pull complete
+9fe4298c8c65: Pull complete
+f1ca857656d1: Pull complete
+95d6c34812f7: Pull complete
+9436c546bd1d: Pull complete
+922326a079d9: Pull complete
+d6e9dcf0d140: Pull complete
+83ac3914c283: Pull complete
+5ffbf9359c6e: Pull complete
+d280abe82126: Pull complete
+f5a37695fe7e: Pull complete
+233830cd10db: Pull complete
+Creating root_psql_1 ... done
+
+$ docker-compose ps
+   Name                  Command              State    Ports  
+--------------------------------------------------------------
+root_psql_1   docker-entrypoint.sh postgres   Up      5432/tcp
+
+[node1] (local) root@192.168.0.48 ~
+$ docker-compose exec psql cat /run/secrets/psql_user
+mysqluser
+[node1] (local) root@192.168.0.48 ~
+$ docker-compose exec psql cat /run/secrets/psql_pass
+mysqlpass
+[node1] (local) root@192.168.0.48 ~
+
+=================================================
+
+Service Updates Changing things in fly:
+
+
+[node1] (local) root@192.168.0.48 ~
+$ docker service create -p 8088:80 --name web nginx:1.13.7
+tmyt1dejy4yo57ra4zprrex0v
+overall progress: 1 out of 1 tasks 
+1/1: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.48 ~
+$ docker service ps web
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+l4m6jbfvmc73        web.1               nginx:1.13.7        node3               Running             Running 15 seconds ago                       
+[node1] (local) root@192.168.0.48 ~
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+tmyt1dejy4yo        web                 replicated          1/1                 nginx:1.13.7        *:8088->80/tcp
+[node1] (local) root@192.168.0.48 ~
+$ docker service scale web=5
+web scaled to 5
+overall progress: 5 out of 5 tasks 
+1/5: running   [==================================================>] 
+2/5: running   [==================================================>] 
+3/5: running   [==================================================>] 
+4/5: running   [==================================================>] 
+5/5: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.48 ~
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+tmyt1dejy4yo        web                 replicated          5/5                 nginx:1.13.7        *:8088->80/tcp
+[node1] (local) root@192.168.0.48 ~
+$ docker service ps web
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE                ERROR               PORTS
+l4m6jbfvmc73        web.1               nginx:1.13.7        node3               Running             Running about a minute ago                       
+dluq1tdmgb26        web.2               nginx:1.13.7        node2               Running             Running 17 seconds ago                           
+3ltygd8ac0x8        web.3               nginx:1.13.7        node1               Running             Running 17 seconds ago                           
+ve90v55vw6ej        web.4               nginx:1.13.7        node1               Running             Running 17 seconds ago                           
+xkpbdyddes1e        web.5               nginx:1.13.7        node3               Running             Running 23 seconds ago                           
+[node1] (local) root@192.168.0.48 ~
+$ docker service update --image=nginx:1.13.6 web
+web
+overall progress: 5 out of 5 tasks 
+1/5: running   [==================================================>] 
+2/5: running   [==================================================>] 
+3/5: running   [==================================================>] 
+4/5: running   [==================================================>] 
+5/5: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.48 ~
+$ docker service ps web
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE             ERROR               PORTS
+ykk35721lfq8        web.1               nginx:1.13.6        node3               Running             Running 9 seconds ago                         
+l4m6jbfvmc73         \_ web.1           nginx:1.13.7        node3               Shutdown            Shutdown 10 seconds ago                       
+zxtc5e3f10b8        web.2               nginx:1.13.6        node2               Running             Running 14 seconds ago                        
+dluq1tdmgb26         \_ web.2           nginx:1.13.7        node2               Shutdown            Shutdown 15 seconds ago                       
+qv1sagk0bg93        web.3               nginx:1.13.6        node1               Running             Running 19 seconds ago                        
+3ltygd8ac0x8         \_ web.3           nginx:1.13.7        node1               Shutdown            Shutdown 20 seconds ago                       
+mzv2lnvsfoql        web.4               nginx:1.13.6        node1               Running             Running 30 seconds ago                        
+ve90v55vw6ej         \_ web.4           nginx:1.13.7        node1               Shutdown            Shutdown 31 seconds ago                       
+igc4wle7zdl8        web.5               nginx:1.13.6        node2               Running             Running 24 seconds ago                        
+xkpbdyddes1e         \_ web.5           nginx:1.13.7        node3               Shutdown            Shutdown 26 seconds ago                       
+[node1] (local) root@192.168.0.48 ~
+
+
+--publish-rm 8088  --- didn't work.. it didn't remove the port.
+
+
+[node1] (local) root@192.168.0.48 ~
+$ docker service update --publish-rm 8088 --publish-add 9090:80 web
+web
+overall progress: 5 out of 5 tasks 
+1/5: running   [==================================================>] 
+2/5: running   [==================================================>] 
+3/5: running   [==================================================>] 
+4/5: running   [==================================================>] 
+5/5: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.48 ~
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+tmyt1dejy4yo        web                 replicated          5/5                 nginx:1.13.6        *:8088->80/tcp, *:9090->80/tcp
+
+
+Not working with protocol name even:
+
+$ docker service update --publish-rm 9090/tcp  web
+web
+overall progress: 5 out of 5 tasks 
+1/5: running   [==================================================>] 
+2/5: running   [==================================================>] 
+3/5: running   [==================================================>] 
+4/5: running   [==================================================>] 
+5/5: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.48 ~
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+tmyt1dejy4yo        web                 replicated          5/5                 nginx:1.13.6        *:9090->80/tcp
+[node1] (local) root@192.168.0.48 ~
+$ 
+
+
+$ docker service update --force web
+web
+overall progress: 5 out of 5 tasks 
+1/5: running   [==================================================>] 
+2/5: running   [==================================================>] 
+3/5: running   [==================================================>] 
+4/5: running   [==================================================>] 
+5/5: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.48 ~
+$ docker service ps web
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE             ERROR               PORTS
+gakst2n9vanw        web.1               nginx:1.13.6        node1               Running             Running 19 seconds ago                        
+np4e0axqis25         \_ web.1           nginx:1.13.6        node1               Shutdown            Shutdown 20 seconds ago                       
+ebtonyoqotco         \_ web.1           nginx:1.13.6        node1               Shutdown            Shutdown 7 minutes ago                        
+5u7drspuh05y         \_ web.1           nginx:1.13.6        node2               Shutdown            Shutdown 8 minutes ago                        
+klugm1ewn7d0         \_ web.1           nginx:1.13.6        node2               Shutdown            Shutdown 9 minutes ago                        
+pjg88cas6z4i        web.2               nginx:1.13.6        node1               Running             Running 34 seconds ago                        
+z6s78f3rhbe2         \_ web.2           nginx:1.13.6        node1               Shutdown            Shutdown 35 seconds ago                       
+0annlcygd2p1         \_ web.2           nginx:1.13.6        node1               Shutdown            Shutdown 7 minutes ago                        
+pbrcxskzj8cg         \_ web.2           nginx:1.13.6        node1               Shutdown            Shutdown 8 minutes ago                        
+t1aixkqbisjg         \_ web.2           nginx:1.13.6        node1               Shutdown            Shutdown 9 minutes ago                        
+v6lu5pbqkse8        web.3               nginx:1.13.6        node3               Running             Running 15 seconds ago                        
+iaduslck52ol         \_ web.3           nginx:1.13.6        node3               Shutdown            Shutdown 16 seconds ago                       
+uvzlmvo6yyap         \_ web.3           nginx:1.13.6        node3               Shutdown            Shutdown 7 minutes ago                        
+6kucwfp1o8b5         \_ web.3           nginx:1.13.6        node1               Shutdown            Shutdown 8 minutes ago                        
+8hw8giau7h6p         \_ web.3           nginx:1.13.6        node1               Shutdown            Shutdown 9 minutes ago                        
+iqo6kn8dizet        web.4               nginx:1.13.6        node2               Running             Running 24 seconds ago                        
+1vd6wuaeen70         \_ web.4           nginx:1.13.6        node2               Shutdown            Shutdown 25 seconds ago                       
+zt2e7cd9rpgc         \_ web.4           nginx:1.13.6        node3               Shutdown            Shutdown 7 minutes ago                        
+12cl2aorwxjk         \_ web.4           nginx:1.13.6        node3               Shutdown            Shutdown 9 minutes ago                        
+pznrjzjvb94r         \_ web.4           nginx:1.13.6        node3               Shutdown            Shutdown 9 minutes ago                        
+3a65tidkcl9q        web.5               nginx:1.13.6        node2               Running             Running 29 seconds ago                        
+woywovxt6lux         \_ web.5           nginx:1.13.6        node2               Shutdown            Shutdown 30 seconds ago                       
+0ow06ukdw1qm         \_ web.5           nginx:1.13.6        node2               Shutdown            Shutdown 7 minutes ago                        
+bqh8xoiyzxud         \_ web.5           nginx:1.13.6        node2               Shutdown            Shutdown 8 minutes ago                        
+b0jbkvyf8ks4         \_ web.5           nginx:1.13.6        node2               Shutdown            Shutdown 9 minutes ago                        
+[node1] (local) root@192.168.0.48 ~
+$ docker service ps web | grep -i running
+gakst2n9vanw        web.1               nginx:1.13.6        node1               Running             Running 32 seconds ago                        
+pjg88cas6z4i        web.2               nginx:1.13.6        node1               Running             Running 46 seconds ago                        
+v6lu5pbqkse8        web.3               nginx:1.13.6        node3               Running             Running 27 seconds ago                        
+iqo6kn8dizet        web.4               nginx:1.13.6        node2               Running             Running 37 seconds ago                        
+3a65tidkcl9q        web.5               nginx:1.13.6        node2               Running             Running 41 seconds ago                        
+[node1] (local) root@192.168.0.48 ~
+$ 
+[node1] (local) root@192.168.0.48 ~
+$ 
