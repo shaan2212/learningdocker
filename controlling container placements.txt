@@ -1,0 +1,91 @@
+Controlling Container Placements:
+
+* By default a swarm service spreads its tasks out over Nodes.Try's to use the least-used Node for a task.
+* Swarm has multiple ways to control which node a container runs on.
+* Can be used togther for complex requirements.
+1. Node Labels plus service contraints ( <key>=<value> )
+2. Service Modes (replicated|global)
+3. (new in 17.04+) Placement Preferences (spread)
+4. Node Availability (active|pause|drain)
+5. Resource Requirements (cpu|memory)
+
+
+Service Constraints:
+
+-bash-4.2$ docker service create --name app1 --constraint node.role==worker nginx
+i342kxxhjqvp3js26v7a3ha4j
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Service converged
+
+-bash-4.2$ docker service ps app1
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+29jycn7bjrib        app1.1              nginx:latest        worker2             Running             Running 38 seconds ago
+
+
+-bash-4.2$ docker service update --constraint-rm node.role==worker --constraint-add node.role==manager app1
+app1
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Service converged
+-bash-4.2$ docker service ps app1
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE             ERROR               PORTS
+r9auvuykv2j2        app1.1              nginx:latest        manager             Running             Running 19 seconds ago
+29jycn7bjrib         \_ app1.1          nginx:latest        worker2             Shutdown            Shutdown 20 seconds ago
+
+-bash-4.2$ docker node update --label-add dmz=true worker2
+worker2
+
+-bash-4.2$ docker inspect worker2
+[
+    {
+        "ID": "p5k4qztbwe92rmq1ygdu9vqkk",
+        "Version": {
+            "Index": 622
+        },
+        "CreatedAt": "2019-12-02T06:35:12.002886593Z",
+        "UpdatedAt": "2019-12-09T04:02:06.979884066Z",
+        "Spec": {
+            "Labels": {
+                "dmz": "true"
+            },
+
+
+
+-bash-4.2$ docker service create --name dmz-nginx --constraint node.labels.dmz==true --replicas 2 nginx
+jkhos0jc8z6t55v4zzhik1fyq
+overall progress: 2 out of 2 tasks
+1/2: running   [==================================================>]
+2/2: running   [==================================================>]
+verify: Service converged
+
+-bash-4.2$ docker service ps dmz-nginx
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+6bjm1tkdg5pl        dmz-nginx.1         nginx:latest        worker2             Running             Running 25 seconds ago
+x8ljpqalykol        dmz-nginx.2         nginx:latest        worker2             Running             Running 25 seconds ago
+-bash-4.2$
+
+
+Built-in labels:
+
+node.id (listed in docker node ls)
+node.hostname (listed in docker node ls)
+node.ip (eg. 172.19.17.0/24)
+node.role (worker | manager)
+node.platform.os (linux|windows|etc)
+node.platform.arch (x86_64|arm64|386|etc)
+node.labels (empty by default)
+
+Cleaning up:
+
+-bash-4.2$ docker service rm app1 dmz-nginx
+app1
+dmz-nginx
+-bash-4.2$ docker service ls
+ID                  NAME                 MODE                REPLICAS            IMAGE                             PORTS
+j2nbudo31jhd        voteapp_visualizer   replicated          1/1                 dockersamples/visualizer:stable   *:8080->8080/tcp
+
+
+-bash-4.2$ docker node update --label-rm dmz worker2
+worker2
+-bash-4.2$

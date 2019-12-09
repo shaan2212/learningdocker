@@ -1,0 +1,123 @@
+HEALTHCHECK
+The HEALTHCHECK instruction has two forms:
+
+HEALTHCHECK [OPTIONS] CMD command (check container health by running a command inside the container)
+HEALTHCHECK NONE (disable any healthcheck inherited from the base image)
+The HEALTHCHECK instruction tells Docker how to test a container to check that it is still working. This can detect cases such as a web server that is stuck in an infinite loop and unable to handle new connections, even though the server process is still running.
+
+States in healthcheck: starting, healthy, unhealthy.
+It expects only 0 (healthy) or 1 (unhealthy), not any other exit code.
+
+When a container has a healthcheck specified, it has a health status in addition to its normal status. This status is initially starting. Whenever a health check passes, it becomes healthy (whatever state it was previously in). After a certain number of consecutive failures, it becomes unhealthy.
+
+The options that can appear before CMD are:
+
+--interval=DURATION (default: 30s)
+--timeout=DURATION (default: 30s)
+--start-period=DURATION (default: 0s)
+--retries=N (default: 3)
+The health check will first run interval seconds after the container is started, and then again interval seconds after each previous check completes.
+
+If a single run of the check takes longer than timeout seconds then the check is considered to have failed.
+
+It takes retries consecutive failures of the health check for the container to be considered unhealthy.
+
+start period provides initialization time for containers that need time to bootstrap. Probe failure during that period will not be counted towards the maximum number of retries. However, if a health check succeeds during the start period, the container is considered started and all consecutive failures will be counted towards the maximum number of retries.
+
+There can only be one HEALTHCHECK instruction in a Dockerfile. If you list more than one then only the last HEALTHCHECK will take effect.
+
+The command after the CMD keyword can be either a shell command (e.g. HEALTHCHECK CMD /bin/check-running) or an exec array (as with other Dockerfile commands; see e.g. ENTRYPOINT for details).
+
+The command’s exit status indicates the health status of the container. The possible values are:
+
+0: success - the container is healthy and ready for use
+1: unhealthy - the container is not working correctly
+2: reserved - do not use this exit code
+For example, to check every five minutes or so that a web-server is able to serve the site’s main page within three seconds:
+
+HEALTHCHECK --interval=5m --timeout=3s \
+  CMD curl -f http://localhost/ || exit 1
+To help debug failing probes, any output text (UTF-8 encoded) that the command writes on stdout or stderr will be stored in the health status and can be queried with docker inspect. Such output should be kept short (only the first 4096 bytes are stored currently).
+
+When the health status of a container changes, a health_status event is generated with the new status.
+
+The HEALTHCHECK feature was added in Docker 1.12.
+
+SHELL
+SHELL ["executable", "parameters"]
+The SHELL instruction allows the default shell used for the shell form of commands to be overridden. The default shell on Linux is ["/bin/sh", "-c"], and on Windows is ["cmd", "/S", "/C"]. The SHELL instruction must be written in JSON form in a Dockerfile.
+
+The SHELL instruction is particularly useful on Windows where there are two commonly used and quite different native shells: cmd and powershell, as well as alternate shells available including sh.
+
+-bash-4.2$ sudo docker run --health-cmd="curl -f localhost:9200/_cluster/health || false" --health-interval=5s \
+> --health-retries=3 --health-timeout=2s --health-start-period=15s elasticsearch:2
+
+
+-bash-4.2$ sudo docker container run --name p2 -d --health-cmd="pg_isready -U postgres || exit 1" postgres
+Unable to find image 'postgres:latest' locally
+latest: Pulling from library/postgres
+000eee12ec04: Already exists
+7b8ef50e8d64: Pull complete
+304f7c67e7db: Pull complete
+9fe4298c8c65: Pull complete
+f1ca857656d1: Pull complete
+95d6c34812f7: Pull complete
+9436c546bd1d: Pull complete
+922326a079d9: Pull complete
+d6e9dcf0d140: Pull complete
+83ac3914c283: Pull complete
+5ffbf9359c6e: Pull complete
+d280abe82126: Pull complete
+f5a37695fe7e: Pull complete
+233830cd10db: Pull complete
+Digest: sha256:c4da9c62c26179440d5dc7409cb7db60f4a498f0f2c080b97fdb9f7ec0b3502b
+Status: Downloaded newer image for postgres:latest
+c9a16a0c495b8ac490a20b152708f12083fb44fa19533c14b84d961219c2cd89
+-bash-4.2$
+
+
+CONTAINER ID        IMAGE                                          COMMAND                  CREATED             STATUS                             PORTS                NAMES
+c9a16a0c495b        postgres                                       "docker-entrypoint.s…"   30 seconds ago      Up 28 seconds (health: starting)   5432/tcp             p2
+
+
+-bash-4.2$ docker container ls
+CONTAINER ID        IMAGE                                          COMMAND                  CREATED             STATUS                    PORTS                NAMES
+c9a16a0c495b        postgres                                       "docker-entrypoint.s…"   37 seconds ago      Up 35 seconds (healthy)   5432/tcp             p2
+
+
+-bash-4.2$ docker container inspect p2
+
+                "Log": [
+                    {
+                        "Start": "2019-12-08T22:21:54.022705241-05:00",
+                        "End": "2019-12-08T22:21:54.686401553-05:00",
+                        "ExitCode": 0,
+                        "Output": "/var/run/postgresql:5432 - accepting connections\n"
+                    }
+                ]
+
+-bash-4.2$ time sudo docker service create --name service1 postgres
+m3cxvzjf5uljpou6bsdz5sa6h
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Service converged
+
+real    0m10.598s
+user    0m0.110s
+sys     0m0.068s
+-bash-4.2$ time sudo docker service create --name service2 --health-cmd="pg_isready -U postgres || exit 1" postgres
+4uc6320kaqr6hjq2bihzdtsud
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Service converged
+
+real    0m42.315s
+user    0m0.360s
+sys     0m0.098s
+-bash-4.2$
+
+-bash-4.2$ docker service ls
+ID                  NAME                 MODE                REPLICAS            IMAGE                                          PORTS
+
+m3cxvzjf5ulj        service1             replicated          1/1                 postgres:latest                          
+4uc6320kaqr6        service2             replicated          1/1                 postgres:latest            
