@@ -1,0 +1,255 @@
+Swarm Configs:
+
+1. Map files/strings stored in Raft Log to any file path in tasks.
+
+2. Ideal for nginx/mysql/etc. configs
+
+3. Now you don't need custome image or bind-mount to host.
+
+4. 17.06+ similar to secrets but can go anywhere in container.
+
+ Immutable, so rotation process is key. 
+ Removable once services are removed. 
+ Strings saved to Swarm Raft Log (instant HA).
+
+5. Private keys should still use secrets (RAM disks, enc at rest).
+
+Create a new config from a nginx config
+
+#docker config create nginx01 ./nginx.conf
+
+Creating a service with a config
+
+#docker service create --config source=nginx01,target=/etc/nginx/conf.d/default.conf
+
+Creating new config to replace old
+
+#docker config create nginx02 ./nginx.conf
+
+Updating service with new config:
+
+#docker service update --config-rm nginx01 --config-add source=nginx02,target=/etc/nginx/conf.d/default.conf
+
+Swarm Configs in Stack Files:
+
+version : "3.3" #3.3 or higher required
+services:
+ web:
+  image:nginx
+  configs:
+    - source: nginx-proxy
+      target: /etc/nginx/conf.d/default.conf
+configs:
+ nginx-proxy:
+  file: ./nginx-app.conf
+
+
+============================
+
+Hands On:
+
+[node1] (local) root@192.168.0.18 ~
+$ git clone https://github.com/BretFisher/udemy-docker-mastery.git
+Cloning into 'udemy-docker-mastery'...
+remote: Enumerating objects: 6, done.
+remote: Counting objects: 100% (6/6), done.
+remote: Compressing objects: 100% (6/6), done.
+remote: Total 820 (delta 2), reused 1 (delta 0), pack-reused 814
+Receiving objects: 100% (820/820), 4.59 MiB | 13.31 MiB/s, done.
+Resolving deltas: 100% (342/342), done.
+[node1] (local) root@192.168.0.18 ~
+$ pwd
+/root
+[node1] (local) root@192.168.0.18 ~
+$ ls
+udemy-docker-mastery
+[node1] (local) root@192.168.0.18 ~
+$ cd  udemy-docker-mastery/
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery
+$ ls
+LICENSE                  compose-sample-3         example-voting-app       slack-chat               swarm-stack-5
+README.md                dockerfile-assignment-1  healthcheck-1            swarm-app-1              swarm-stack-6
+bindmount-sample-1       dockerfile-sample-1      k8s-yaml                 swarm-app-2              visualizer
+compose-assignment-1     dockerfile-sample-2      registry-sample-1        swarm-stack-1
+compose-assignment-2     dockerfile-sample-3      secrets-assignment-1     swarm-stack-2
+compose-sample-1         dockerfile-sample-4      secrets-sample-1         swarm-stack-3
+compose-sample-2         dockerfile-sample-5      secrets-sample-2         swarm-stack-4
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery
+$ cd swar
+swarm-app-1/   swarm-app-2/   swarm-stack-1/ swarm-stack-2/ swarm-stack-3/ swarm-stack-4/ swarm-stack-5/ swarm-stack-6/ 
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery
+$ cd swarm-s
+swarm-stack-1/ swarm-stack-2/ swarm-stack-3/ swarm-stack-4/ swarm-stack-5/ swarm-stack-6/ 
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery
+$ cd swarm-stack-6
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ ls
+example-voting-app-stack.yml  nginx-app.conf
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ cat nginx-app.conf
+server {
+
+        listen 80;
+
+        location / {
+
+                proxy_pass         http://vote;
+                proxy_redirect     off;
+                proxy_set_header   Host $host;
+                proxy_set_header   X-Real-IP $remote_addr;
+                proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header   X-Forwarded-Host $server_name;
+
+        }
+}
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ docker stack deploy -c example-voting-app-stack.yml vote
+Creating network vote_frontend
+Creating network vote_backend
+Creating service vote_db
+Creating service vote_vote
+Creating service vote_result
+Creating service vote_worker
+Creating service vote_redis
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ docker config create vote-nginx-20191210 ./nginx-app.conf
+l06am600s588axqyo6lwsny7k
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ docker config ls
+ID                          NAME                  CREATED             UPDATED
+l06am600s588axqyo6lwsny7k   vote-nginx-20191210   5 seconds ago       5 seconds ago
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ cat example-voting-app-stack.yml 
+version: '3'
+services:
+    redis:
+        image: redis:alpine
+        networks:
+            - frontend
+    db:
+        image: postgres:9.6
+        volumes:
+            - db-data:/var/lib/postgresql/data
+        networks:
+            - backend
+        deploy:
+    vote:
+        image: bretfisher/examplevotingapp_vote
+        ports:
+            - '5000:80'
+        networks:
+            - frontend
+        deploy:
+            mode: global
+    result:
+        image: bretfisher/examplevotingapp_result
+        ports:
+            - '5001:80'
+        networks:
+            - backend
+    worker:
+        image: bretfisher/examplevotingapp_worker:java
+        networks:
+            - frontend
+            - backend
+        deploy:
+            mode: global
+networks:
+    frontend:
+    backend:
+volumes:
+    db-data:
+
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ docker service create --config source=vote-nginx-20191210,target=/etc/nginx/conf.d/default.conf -p 9000:80 --network vote_frontend --name proxy nginx
+8ckemghsbavqaqn716se1yozc
+overall progress: 1 out of 1 tasks 
+1/1: running   [==================================================>] 
+verify: Service converged 
+
+===========================>>>>>>>>>>>>>>NOW THE VOTING WEBPAGE SHOULD APPEAR ON THE SAME IP AND PORT 9000<<<<<<<<<<<<<<<<=============================================
+
+
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ docker service ps proxy
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE                ERROR               PORTS
+qd0jh90vmwjq        proxy.1             nginx:latest        node2               Running             Running about a minute ago                       
+
+
+On Node2:
+
+
+[node2] (local) root@192.168.0.17 ~
+$ docker container ls
+CONTAINER ID        IMAGE                                       COMMAND                  CREATED             STATUS              PORTS               NAMES
+4179b80a1050        nginx:latest                                "nginx -g 'daemon of…"   6 minutes ago       Up 6 minutes        80/tcp              proxy.1.qd0jh90vmwjq56yvg0c30z6wp
+5fe0e56fdb91        bretfisher/examplevotingapp_result:latest   "node server.js"         18 minutes ago      Up 18 minutes       80/tcp              vote_result.1.gasqmkl44ns2is2kpifkmwer8
+bca574a2f5a5        bretfisher/examplevotingapp_vote:latest     "gunicorn app:app -b…"   18 minutes ago      Up 18 minutes       80/tcp              vote_vote.ibiyjr82v5asmaerw6ubdlrfz.qxzxk2ndldbusuqt5yuxse25h
+71b48ab020cc        bretfisher/examplevotingapp_worker:java     "java -XX:+UnlockExp…"   18 minutes ago      Up 18 minutes                           vote_worker.ibiyjr82v5asmaerw6ubdlrfz.mx9pqgvi1kdhu35nn1e1w3sty
+[node2] (local) root@192.168.0.17 ~
+
+$ docker exec -it proxy.1.qd0jh90vmwjq56yvg0c30z6wp cat /etc/nginx/conf.d/default.conf
+server {
+
+        listen 80;
+
+        location / {
+
+                proxy_pass         http://vote;
+                proxy_redirect     off;
+                proxy_set_header   Host $host;
+                proxy_set_header   X-Real-IP $remote_addr;
+                proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header   X-Forwarded-Host $server_name;
+
+        }
+}
+[node2] (local) root@192.168.0.17 ~
+$ 
+
+
+ docker config create vote-nginx-20191212 ./nginx-app.conf
+a45hskum7ral2sy9vufwafr3a
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ docker service update --config-rm vote-nginx-20191210 --config-add source=vote-nginx-20191212,target=/etc/nginx/conf.d/default.conf proxyproxy
+overall progress: 1 out of 1 tasks 
+1/1: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE                                       PORTS
+8ckemghsbavq        proxy               replicated          1/1                 nginx:latest                                *:9000->80/tcp
+k8imdy0jteeg        viz                 replicated          1/1                 bretfisher/visualizer:latest                *:8080->8080/tcp
+kveexr07ux0q        vote_db             replicated          1/1                 postgres:9.6                                
+y6y8qz4ham0a        vote_redis          replicated          1/1                 redis:alpine                                
+dr3c4xrx7ul1        vote_result         replicated          1/1                 bretfisher/examplevotingapp_result:latest   *:5001->80/tcp
+41km5d2prl3w        vote_vote           global              3/3                 bretfisher/examplevotingapp_vote:latest     *:5000->80/tcp
+q3xo4x6ogmf5        vote_worker         global              3/3                 bretfisher/examplevotingapp_worker:java     
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ docker service ps proxy
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE             ERROR               PORTS
+iwm19o75ba7p        proxy.1             nginx:latest        node2               Running             Running 25 seconds ago                        
+qd0jh90vmwjq         \_ proxy.1         nginx:latest        node2               Shutdown            Shutdown 26 seconds ago                       
+[node1] (local) root@192.168.0.18 ~/udemy-docker-mastery/swarm-stack-6
+$ 
+
+Removing Stack, service, config:
+
+$ docker stack rm vote;docker service rm proxy;docker config rm vote-nginx-20191210 vote-nginx-20191212
+Removing service vote_db
+Removing service vote_redis
+Removing service vote_result
+Removing service vote_vote
+Removing service vote_worker
+Removing network vote_backend
+Removing network vote_frontend
+Failed to remove network wa84hjabnpnatqiebrj6zugc9: Error response from daemon: rpc error: code = FailedPrecondition desc = network wa84hjabnpnatqiebrj6zugc9 is in use by service 8ckemghsbavqaqn716se1yozcFailed to remove some resources from stack: vote
+proxy
+vote-nginx-20191210
+vote-nginx-20191212
+
+
+
+opsintcenter.fnis.com/StatusOnAPage/SoapMainController?action=UV
+
+opsintcenter.fnis.com/AutomationAsService/AaaSMainController?action=UV

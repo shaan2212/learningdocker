@@ -1,0 +1,69 @@
+Service Modes:
+
+1. Notice it in docker service ls
+2. Defaults to replicated, but global is an option.
+3. Global=one task per node
+4. Set on service create only, must remove service to change. 
+5. Good for host agents (security, monitoring, backup, proxy, etc).
+6. Global Mode can be combined with constraints. (version 1.13+)
+
+
+
+[node1] (local) root@192.168.0.48 ~/voting-app/example-voting-app
+$ docker service create --mode=global --name=test1 nginx
+u2dxb2rmibqce20eg40gcqs9o
+overall progress: 4 out of 4 tasks 
+przg4018ytv0: running   [==================================================>] 
+epr99u2uuky4: running   [==================================================>] 
+ptncdjhii2as: running   [==================================================>] 
+khlavmixa3pv: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.48 ~/voting-app/example-voting-app
+$ docker service ls
+ID                  NAME                 MODE                REPLICAS            IMAGE                             PORTS
+u2dxb2rmibqc        test1                global              4/4                 nginx:latest                      
+q9vom02oh95n        voteapp_visualizer   replicated          1/1                 dockersamples/visualizer:stable   *:8080->8080/tcp
+[node1] (local) root@192.168.0.48 ~/voting-app/example-voting-app
+$ docker service ps test1
+ID                  NAME                              IMAGE               NODE                DESIRED STATE       CURRENT STATE            
+ERROR               PORTS
+1vfev5nr30mh        test1.przg4018ytv0ksr3fqsvvkcst   nginx:latest        node4               Running             Running 31 seconds ago   
+                    
+dgk73ddgd6im        test1.epr99u2uuky4temuxydo1j98x   nginx:latest        node3               Running             Running 31 seconds ago   
+                    
+129pvl9sspag        test1.khlavmixa3pvam8x8okpiv84v   nginx:latest        node2               Running             Running 31 seconds ago   
+                    
+ov2k20yegep0        test1.ptncdjhii2as07utv3m51a6zr   nginx:latest        node1               Running             Running 30 seconds ago                       
+[node1] (local) root@192.168.0.48 ~/voting-app/example-voting-app
+$ 
+[node1] (local) root@192.168.0.48 ~/voting-app/example-voting-app
+$ 
+
+[node1] (local) root@192.168.0.48 ~/voting-app/example-voting-app
+$ docker service rm test1
+test1
+[node1] (local) root@192.168.0.48 ~/voting-app/example-voting-app
+$ docker service ls
+ID                  NAME                 MODE                REPLICAS            IMAGE                             PORTS
+q9vom02oh95n        voteapp_visualizer   replicated          1/1                 dockersamples/visualizer:stable   *:8080->8080/tcp
+[node1] (local) root@192.168.0.48 ~/voting-app/example-voting-app
+$ docker service create --mode=global --name=test1 --constraint=node.role==worker nginx
+8i78qliotelyddf5l7kgc7hwt
+overall progress: 3 out of 3 tasks 
+przg4018ytv0: running   [==================================================>] 
+khlavmixa3pv: running   [==================================================>] 
+epr99u2uuky4: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.48 ~/voting-app/example-voting-app
+$ docker service ls
+ID                  NAME                 MODE                REPLICAS            IMAGE                             PORTS
+8i78qliotely        test1                global              3/3                 nginx:latest                      
+q9vom02oh95n        voteapp_visualizer   replicated          1/1                 dockersamples/visualizer:stable   *:8080->8080/tcp
+[node1] (local) root@192.168.0.48 ~/voting-app/example-voting-app
+$ docker service ps test1
+ID                  NAME                              IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+lnu4c4mxrftk        test1.przg4018ytv0ksr3fqsvvkcst   nginx:latest        node4               Running             Running 33 seconds ago                       
+jg75f1seauxg        test1.epr99u2uuky4temuxydo1j98x   nginx:latest        node3               Running             Running 33 seconds ago                       
+6loqrzvminzx        test1.khlavmixa3pvam8x8okpiv84v   nginx:latest        node2               Running             Running 33 seconds ago                       
+[node1] (local) root@192.168.0.48 ~/voting-app/example-voting-app
+$ 

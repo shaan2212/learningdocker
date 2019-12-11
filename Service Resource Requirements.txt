@@ -1,0 +1,15 @@
+## Service Resource Requirements
+
+docker service create --reserve-memory 800M --name 800 nginx
+
+docker service create --replicas 4 --reserve-memory 300M --name 300 nginx
+
+docker service update --reserve-memory 0 800
+
+docker service create --reserve-cpu 8 --name 8 nginx
+
+docker service ps 8
+
+docker service create --limit-memory 100M --name 100 bretfisher/stress:256m
+
+docker service ps 100

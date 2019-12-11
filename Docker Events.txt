@@ -1,0 +1,106 @@
+service logs: inside your containers
+daemon logs/journald logs: access denied etc
+docker events: action taken on networks, services etc.
+
+Docker Events:
+
+1. "Action Taken" Logs of Docker Engine and Swarm e.g "network create", "service update", 
+"container start".
+
+2. "docker events" received swarmkit events in 17.06
+ services/nodes/secrets/configs got create/update/remove
+
+3. Has searching (filtering) and formatting.
+
+4. Limited to last 1000 events (no logs are stored on disk).
+
+5. Two scopes "local" and "swarm". 
+
+local : can show us the low level things which takes place on the node (like workers). take example of a network being created, or a container gets created on remote node. 
+
+6. Not the same as dockerd (journald) log, also not an error log. 
+
+# Follow Future Events:
+
+$ docker events
+2019-12-10T10:48:32.596887176Z container exec_create: /bin/sh -c node /app/healthcheck.js || exit 1 f5a36c8013f697091b73c5dbc5510675c84e91e269912eba4d7c6991a8f43e34 (execID=bed747de51f94c991effd016473902c97aee73d360c53d9c55782fd1f9cb6f2c, image=dockersamples/visualizer, name=reverent_mcnulty)
+2019-12-10T10:48:32.596996077Z container exec_start: /bin/sh -c node /app/healthcheck.js || exit 1 f5a36c8013f697091b73c5dbc5510675c84e91e269912eba4d7c6991a8f43e34 (execID=bed747de51f94c991effd016473902c97aee73d360c53d9c55782fd1f9cb6f2c, image=dockersamples/visualizer, name=reverent_mcnulty)
+2019-12-10T10:48:33.219903681Z container exec_die f5a36c8013f697091b73c5dbc5510675c84e91e269912eba4d7c6991a8f43e34 (execID=bed747de51f94c991effd016473902c97aee73d360c53d9c55782fd1f9cb6f2c, exitCode=0, image=dockersamples/visualizer, name=reverent_mcnulty)
+
+# Return events from a date until now and future
+
+$ docker events --since '2017-01-05'
+
+$ docker events --since '2013-09-03T15:49:29'
+
+#Return events from mins/hours ago until now and future.
+
+$docker events --since '10m'
+$docker events --since '2h10m'
+
+#Return in between events:
+
+$ docker events --since '2017-01-05T00:35:30' --until '2017-01-05T00:36:05
+
+
+
+Filter events by criteria:
+
+$ docker events --filter 'event=stop'
+
+$ docker events --filter 'image=alpine'
+
+$ docker events --filter 'container=test'
+
+$ docker events --filter 'container=test' --filter 'container=d9cdb1525ea8'
+
+$ docker events --filter 'container=test' --filter 'event=stop'
+
+$ docker events --filter 'type=volume'
+
+$ docker events --filter 'type=network'
+
+$ docker events --filter 'container=container_1' --filter 'container=container_2'
+
+$ docker events --filter 'type=plugin'
+
+$ docker events -f type=service
+
+$ docker events -f type=node
+
+$ docker events -f type=secret
+
+$  docker events -f type=config
+
+$ docker events --filter 'scope=swarm'
+
+Format the output
+
+$ docker events --filter 'type=container' --format 'Type={{.Type}}  Status={{.Status}}  ID={{.ID}}'
+
+Type=container  Status=create  ID=2ee349dac409e97974ce8d01b70d250b85e0ba8189299c126a87812311951e26
+Type=container  Status=attach  ID=2ee349dac409e97974ce8d01b70d250b85e0ba8189299c126a87812311951e26
+Type=container  Status=start  ID=2ee349dac409e97974ce8d01b70d250b85e0ba8189299c126a87812311951e26
+Type=container  Status=resize  ID=2ee349dac409e97974ce8d01b70d250b85e0ba8189299c126a87812311951e26
+Type=container  Status=die  ID=2ee349dac409e97974ce8d01b70d250b85e0ba8189299c126a87812311951e26
+Type=container  Status=destroy  ID=2ee349dac409e97974ce8d01b70d250b85e0ba8189299c126a87812311951e26
+
+FORMAT AS JSON
+
+$ docker events --format '{{json .}}'
+
+{"status":"create","id":"196016a57679bf42424484918746a9474cd905dd993c4d0f4..
+{"status":"attach","id":"196016a57679bf42424484918746a9474cd905dd993c4d0f4..
+{"Type":"network","Action":"connect","Actor":{"ID":"1b50a5bf755f6021dfa78e..
+{"status":"start","id":"196016a57679bf42424484918746a9474cd905dd993c4d0f42..
+{"status":"resize","id":"196016a57679bf42424484918746a9474cd905dd993c4d0f4..
+
+
+OR and AND:
+
+It will act as OR because here filter <keys> are same -- filter type
+docker events --since 1h --filter type=container --filter type=network
+
+It will act as AND because here filter <keys> are differnt -- filter scope and filter type
+
+docker events --since 1hr --filter scope=swarm --filter type=network

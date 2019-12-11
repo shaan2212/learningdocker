@@ -1,0 +1,100 @@
+Node Availability:
+
+Each node can have one of three admin-controlled states.
+Only affects if existing or new containers can run on that node.
+active: Run existing tasks, available for new tasks.
+pause: run existing tasks, not available for new tasks (good for troubleshooting).
+drain: Reschedules existing tasks, not available for new tasks (good for maintenance).
+
+Remember this affects service updates and recovering tasks too. (coz pause node will not get updates).
+
+Internet examples include "drain managers", but not realistic.
+Use labels to control manager tasks.
+
+
+$ docker service create --name webapp1 --replicas 5 nginx
+m7ui7ag3uo2aaufotyio6qenh
+overall progress: 5 out of 5 tasks 
+1/5: running   [==================================================>] 
+2/5: running   [==================================================>] 
+3/5: running   [==================================================>] 
+4/5: running   [==================================================>] 
+5/5: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --availability=pause node2
+node2
+[node1] (local) root@192.168.0.18 ~
+$ docker service update --replicas=8 webapp1
+webapp1
+overall progress: 8 out of 8 tasks 
+1/8: running   [==================================================>] 
+2/8: running   [==================================================>] 
+3/8: running   [==================================================>] 
+4/8: running   [==================================================>] 
+5/8: running   [==================================================>] 
+6/8: running   [==================================================>] 
+7/8: running   [==================================================>] 
+8/8: running   [==================================================>] 
+verify: Service converged 
+
+
+
+$ docker service ps webapp1
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE           ERROR               PORTS
+ft1wqc61o3hi        webapp1.1           nginx:latest        node2               Running             Running 6 minutes ago                       
+lnf2rwag2jo2        webapp1.2           nginx:latest        node4               Running             Running 6 minutes ago                       
+hx6n4s6bb8qa        webapp1.3           nginx:latest        node3               Running             Running 6 minutes ago                       
+tqfl72at9t0i        webapp1.4           nginx:latest        node1               Running             Running 6 minutes ago                       
+78oo6fg7r4mi        webapp1.5           nginx:latest        node2               Running             Running 6 minutes ago                       
+eaxitdw33il4        webapp1.6           nginx:latest        node4               Running             Running 3 minutes ago                       
+gfyjptl0t2ox        webapp1.7           nginx:latest        node3               Running             Running 3 minutes ago                       
+zox95qoaxm0k        webapp1.8           nginx:latest        node1               Running             Running 3 minutes ago                       
+[node1] (local) root@192.168.0.18 ~
+
+
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --availability=drain node3
+node3
+[node1] (local) root@192.168.0.18 ~
+$ docker service ps webapp1
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+ft1wqc61o3hi        webapp1.1           nginx:latest        node2               Running             Running 8 minutes ago                        
+lnf2rwag2jo2        webapp1.2           nginx:latest        node4               Running             Running 8 minutes ago                        
+slghwoni1emi        webapp1.3           nginx:latest        node2               Running             Running 1 second ago                         
+hx6n4s6bb8qa         \_ webapp1.3       nginx:latest        node3               Shutdown            Shutdown 2 seconds ago                       
+tqfl72at9t0i        webapp1.4           nginx:latest        node1               Running             Running 8 minutes ago                        
+78oo6fg7r4mi        webapp1.5           nginx:latest        node2               Running             Running 8 minutes ago                        
+eaxitdw33il4        webapp1.6           nginx:latest        node4               Running             Running 5 minutes ago                        
+al3psy95sg1b        webapp1.7           nginx:latest        node4               Running             Running 1 second ago                         
+gfyjptl0t2ox         \_ webapp1.7       nginx:latest        node3               Shutdown            Shutdown 2 seconds ago                       
+zox95qoaxm0k        webapp1.8           nginx:latest        node1               Running             Running 5 minutes ago                        
+[node1] (local) root@192.168.0.18 ~
+$ docker node ls
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+rpi7zm6f58bsg27flw5r5zn61 *   node1               Ready               Active              Leader              19.03.4
+uv3t4tfdeiwuf93456h3xl1is     node2               Ready               Active                                  19.03.4
+4axpu998jh7jx6t38d6jwccwj     node3               Ready               Drain                                   19.03.4
+ebyyc6z1b9unw7231g9hp7b5k     node4               Ready               Active                                  19.03.4
+[node1] (local) root@192.168.0.18 ~
+$ 
+
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --availability=active node3
+node3
+[node1] (local) root@192.168.0.18 ~
+$ 
+
+
+[node1] (local) root@192.168.0.18 ~
+$ docker node ls
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+rpi7zm6f58bsg27flw5r5zn61 *   node1               Ready               Active              Leader              19.03.4
+uv3t4tfdeiwuf93456h3xl1is     node2               Ready               Active                                  19.03.4
+4axpu998jh7jx6t38d6jwccwj     node3               Ready               Active                                  19.03.4
+ebyyc6z1b9unw7231g9hp7b5k     node4               Ready               Active                                  19.03.4
+[node1] (local) root@192.168.0.18 ~
+$ 
+
+
+$ 

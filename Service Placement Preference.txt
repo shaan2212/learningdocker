@@ -1,0 +1,174 @@
+Service Placement Preference:
+
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --label-add azone=1 node1
+node1
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --label-add azone=2 node2
+node2
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --label-add azone=3 node3
+node3
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --label-add azone=4 node4
+node4
+
+
+[node1] (local) root@192.168.0.18 ~
+$ docker service create --placement-pref=spread=node.labels.azone --replicas 4 --name webapp nginx 
+kfpfso6dnirdcfyeb5gez30xm
+overall progress: 4 out of 4 tasks 
+1/4: running   [==================================================>] 
+2/4: running   [==================================================>] 
+3/4: running   [==================================================>] 
+4/4: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.18 ~
+$ docker service ps webapp
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+w4j7u40y0ozc        webapp.1            nginx:latest        node4               Running             Running 21 seconds ago                       
+8f52z8nkdk5u        webapp.2            nginx:latest        node1               Running             Running 20 seconds ago                       
+g9jwpih3nc8y        webapp.3            nginx:latest        node2               Running             Running 21 seconds ago                       
+v75z1y7yhlf2        webapp.4            nginx:latest        node3               Running             Running 21 seconds ago                       
+[node1] (local) root@192.168.0.18 ~
+$ 
+
+=======================================================================================================
+
+node1 : azone=1
+node2 : azone=2
+node3 : azone=2
+node4 : azone=4
+
+$ docker node update --label-rm azone node3
+node3
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --label-add azone=2 node3
+node3
+
+$ docker service create --placement-pref=spread=node.labels.azone --replicas 3 --name webapp nginx
+1uh1h61biwapz4yj2bmobfo43
+overall progress: 3 out of 3 tasks 
+1/3: running   [==================================================>] 
+2/3: running   [==================================================>] 
+3/3: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.18 ~
+$ docker service create --placement-pref=spread=node.labels.azone --replicas 3 --name webapp2 nginx
+ryan0nrv0hhcxvr6b79eksuw7
+overall progress: 3 out of 3 tasks 
+1/3: running   [==================================================>] 
+2/3: running   [==================================================>] 
+3/3: running   [==================================================>] 
+verify: Service converged 
+
+
+$ docker service ls
+ID                  NAME                 MODE                REPLICAS            IMAGE                             PORTS
+jqty4aqkzr9j        voteapp_visualizer   replicated          1/1                 dockersamples/visualizer:stable   *:8080->8080/tcp
+1uh1h61biwap        webapp               replicated          3/3                 nginx:latest                      
+ryan0nrv0hhc        webapp2              replicated          3/3                 nginx:latest                    
+
+$ docker service update --placement-pref-rm spread=node.labels.azone webapp
+webapp
+overall progress: 3 out of 3 tasks 
+1/3: running   [==================================================>] 
+2/3: running   [==================================================>] 
+3/3: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.18 ~
+$ docker service scale webapp2=8
+webapp2 scaled to 8
+overall progress: 8 out of 8 tasks 
+1/8: running   [==================================================>] 
+2/8: running   [==================================================>] 
+3/8: running   [==================================================>] 
+4/8: running   [==================================================>] 
+5/8: running   [==================================================>] 
+6/8: running   [==================================================>] 
+7/8: running   [==================================================>] 
+8/8: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.18 ~
+$ docker service ps webapp2
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+y5clpspcpchy        webapp2.1           nginx:latest        node2               Running             Running 9 minutes ago                        
+qum8jp6oveqa        webapp2.2           nginx:latest        node4               Running             Running 9 minutes ago                        
+phyzxk1bnoiw        webapp2.3           nginx:latest        node1               Running             Running 9 minutes ago                        
+v4jlc775ed8b        webapp2.4           nginx:latest        node3               Running             Running 43 seconds ago                       
+yyl2n0ojztzh        webapp2.5           nginx:latest        node2               Running             Running 43 seconds ago                       
+rd70bjdcfulu        webapp2.6           nginx:latest        node4               Running             Running 43 seconds ago                       
+u0ns4sl7dvm7        webapp2.7           nginx:latest        node1               Running             Running 43 seconds ago                       
+nlt9z441f1ye        webapp2.8           nginx:latest        node1               Running             Running 43 seconds ago                       
+[node1] (local) root@192.168.0.18 ~
+$ docker service ps webapp
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE           ERROR               PORTS
+qthwd10gi59d        webapp.1            nginx:latest        node1               Running             Running 9 minutes ago                       
+t4kejf5ltpo5        webapp.2            nginx:latest        node4               Running             Running 9 minutes ago                       
+rti00fkfw0zm        webapp.3            nginx:latest        node3               Running             Running 9 minutes ago                       
+[node1] (local) root@192.168.0.18 ~
+
+
+$ docker service update --constraint-add node.role==worker webapp2
+webapp2
+overall progress: 8 out of 8 tasks 
+1/8: running   [==================================================>] 
+2/8: running   [==================================================>] 
+3/8: running   [==================================================>] 
+4/8: running   [==================================================>] 
+5/8: running   [==================================================>] 
+6/8: running   [==================================================>] 
+7/8: running   [==================================================>] 
+8/8: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.18 ~
+$ docker service ps webapp2
+ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+y5clpspcpchy        webapp2.1           nginx:latest        node2               Running             Running 14 minutes ago                       
+qum8jp6oveqa        webapp2.2           nginx:latest        node4               Running             Running 14 minutes ago                       
+iojpx0f7dllr        webapp2.3           nginx:latest        node4               Running             Running 3 minutes ago                        
+phyzxk1bnoiw         \_ webapp2.3       nginx:latest        node1               Shutdown            Shutdown 3 minutes ago                       
+v4jlc775ed8b        webapp2.4           nginx:latest        node3               Running             Running 6 minutes ago                        
+yyl2n0ojztzh        webapp2.5           nginx:latest        node2               Running             Running 6 minutes ago                        
+rd70bjdcfulu        webapp2.6           nginx:latest        node4               Running             Running 6 minutes ago                        
+lpwd56h4b7gq        webapp2.7           nginx:latest        node4               Running             Running 3 minutes ago                        
+u0ns4sl7dvm7         \_ webapp2.7       nginx:latest        node1               Shutdown            Shutdown 3 minutes ago                       
+oyobxn8q447e        webapp2.8           nginx:latest        node3               Running             Running 3 minutes ago                        
+nlt9z441f1ye         \_ webapp2.8       nginx:latest        node1               Shutdown            Shutdown 3 minutes ago                       
+[node1] (local) root@192.168.0.18 ~
+$ 
+
+Placement Preferences in Stack Files:
+
+version : "3.1"
+services: 
+   web:
+    image: nginx
+    deploy:
+     placement:
+      preferences:
+       spread:node:labels:azone
+
+
+Deleting service and labels:
+
+
+[node1] (local) root@192.168.0.18 ~
+$ docker service rm webapp webapp2
+webapp
+webapp2
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --label-rm=azone node1
+node1
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --label-rm=azone node2
+node2
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --label-rm=azone node3
+node3
+[node1] (local) root@192.168.0.18 ~
+$ docker node update --label-rm=azone node4
+node4
+[node1] (local) root@192.168.0.18 ~
+$ 
+

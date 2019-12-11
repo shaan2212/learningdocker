@@ -1,0 +1,150 @@
+Service Logs:
+
+1.Same as docker container logs, but aggregates all service tasks.
+2.Can return all tasks at once, or just one task's logs.
+3.Great for real time cli troubleshooting. 
+4.Has options for follow/tail, and other common log options.
+5.Not for log storage, or searching, or feeding into other systems.
+6.Doesn't work if you use --log-drive for sending logs off server.
+7.Therefore: use for small swarms and testing. 
+
+Example:
+
+Return all logs for a service
+
+#docker service logs <servicename/id>
+
+Return all logs for a single task:
+
+#docker service logs <task id>
+
+Return unformatted logs with no trunking:
+
+#docker service logs --raw --no-truc <servicename/id>
+
+Only return last 50 log entries and all future logs:
+
+#docker service logs --tail 50 --follow <servicename/id>
+
+
+
+docker run -it -d -p 8080:8080 -v /var/run/docker.sock:/var/run/docker.sock dockersamples/visualizer
+
+===============================================================================
+
+[node1] (local) root@192.168.0.13 ~
+$ git clone https://github.com/shaan2212/example-voting-app.git
+Cloning into 'example-voting-app'...
+remote: Enumerating objects: 832, done.
+remote: Total 832 (delta 0), reused 0 (delta 0), pack-reused 832
+Receiving objects: 100% (832/832), 950.35 KiB | 14.40 MiB/s, done.
+Resolving deltas: 100% (293/293), done.
+
+
+$docker stack deploy -c docker-stack.yml vote
+
+[node1] (local) root@192.168.0.13 ~/example-voting-app/result
+$ docker ps
+CONTAINER ID        IMAGE                                          COMMAND                  CREATED             STATUS                    PORTS                    NAMES
+8e96a55e26fb        dockersamples/examplevotingapp_worker:latest   "/bin/sh -c 'dotnet …"   4 minutes ago       Up 4 minutes                                       vote_worker.1.fzix66z285p3nz1qpww4o1vmn
+ba3e0adf4c09        postgres:9.4                                   "docker-entrypoint.s…"   4 minutes ago       Up 4 minutes              5432/tcp                 vote_db.1.8s31hdfacd066h9f2dex2i1vw
+943f1557fd77        dockersamples/visualizer:stable                "npm start"              4 minutes ago       Up 4 minutes              8080/tcp                 vote_visualizer.1.qlmr6tq0zx9tojcecgdrwze27
+f5a36c8013f6        dockersamples/visualizer                       "npm start"              29 minutes ago      Up 29 minutes (healthy)   0.0.0.0:8080->8080/tcp   reverent_mcnulty
+
+[node1] (local) root@192.168.0.13 ~/example-voting-app/result
+$ docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE                                          PORTS
+fba01de1jruu        vote_db             replicated          1/1                 postgres:9.4                                   
+2dlwmakr6zkm        vote_redis          replicated          1/1                 redis:alpine                                   
+uonj8fkdsnvw        vote_result         replicated          1/1                 dockersamples/examplevotingapp_result:before   *:5001->80/tcp
+3ag0iy8xm5ii        vote_visualizer     replicated          1/1                 dockersamples/visualizer:stable                *:8080->8080/tcp
+xeldfp3mnr1v        vote_vote           replicated          2/2                 dockersamples/examplevotingapp_vote:before     *:5000->80/tcp
+9pk9cnsfa8cn        vote_worker         replicated          1/1                 dockersamples/examplevotingapp_worker:latest  
+
+
+$ docker service logs vote_worker
+vote_worker.1.fzix66z285p3@node1    | Connected to db
+vote_worker.1.fzix66z285p3@node1    | Connecting to redis
+vote_worker.1.fzix66z285p3@node1    | Found redis at 10.0.1.5
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'a' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'a' by '8b61818c3fa9e496'
+
+[node1] (local) root@192.168.0.13 ~/example-voting-app/result
+$ docker service ps vote_worker
+ID                  NAME                IMAGE                                          NODE                DESIRED STATE       CURRENT STATE           ERROR               PORTS
+fzix66z285p3        vote_worker.1       dockersamples/examplevotingapp_worker:latest   node1               Running             Running 9 minutes ago                       
+[node1] (local) root@192.168.0.13 ~/example-voting-app/result
+$ docker service logs fzix66z285p3
+vote_worker.1.fzix66z285p3@node1    | Connected to db
+vote_worker.1.fzix66z285p3@node1    | Connecting to redis
+vote_worker.1.fzix66z285p3@node1    | Found redis at 10.0.1.5
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'a' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'b' by '8b61818c3fa9e496'
+vote_worker.1.fzix66z285p3@node1    | Processing vote for 'a' by '8b61818c3fa9e496'
+[node1] (local) root@192.168.0.13 ~/example-voting-app/result
+$ docker service ps vote_vote
+ID                  NAME                IMAGE                                        NODE                DESIRED STATE       CURRENT STATE            ERROR               PORTS
+geerqhy4e4kb        vote_vote.1         dockersamples/examplevotingapp_vote:before   node3               Running             Running 11 minutes ago                       
+zpkqsex1os0n        vote_vote.2         dockersamples/examplevotingapp_vote:before   node4               Running             Running 11 minutes ago                       
+[node1] (local) root@192.168.0.13 ~/example-voting-app/result
+$ docker service logs geerqhy4e4kb
+vote_vote.1.geerqhy4e4kb@node3    | [2019-12-10 09:44:52 +0000] [1] [INFO] Starting gunicorn 19.6.0
+vote_vote.1.geerqhy4e4kb@node3    | [2019-12-10 09:44:52 +0000] [1] [INFO] Listening at: http://0.0.0.0:80 (1)
+vote_vote.1.geerqhy4e4kb@node3    | [2019-12-10 09:44:52 +0000] [1] [INFO] Using worker: sync
+vote_vote.1.geerqhy4e4kb@node3    | [2019-12-10 09:44:52 +0000] [10] [INFO] Booting worker with pid: 10
+vote_vote.1.geerqhy4e4kb@node3    | [2019-12-10 09:44:52 +0000] [11] [INFO] Booting worker with pid: 11
+vote_vote.1.geerqhy4e4kb@node3    | [2019-12-10 09:44:52 +0000] [12] [INFO] Booting worker with pid: 12
+vote_vote.1.geerqhy4e4kb@node3    | [2019-12-10 09:44:52 +0000] [13] [INFO] Booting worker with pid: 13
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:47:16 +0000] "GET /static/stylesheets/style.css HTTP/1.1" 200 - "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:47:18 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:47:19 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:47:19 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:53:14 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:53:23 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:53:35 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+
+$ docker service logs --tail 5 --follow vote_vote
+vote_vote.2.zpkqsex1os0n@node4    | 10.255.0.2 - - [10/Dec/2019:09:47:18 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.2.zpkqsex1os0n@node4    | 10.255.0.2 - - [10/Dec/2019:09:47:19 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:47:19 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:47:19 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:53:14 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:53:23 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:53:35 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.2.zpkqsex1os0n@node4    | 10.255.0.2 - - [10/Dec/2019:09:47:30 +0000] "GET / HTTP/1.1" 200 1285 "-" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.2.zpkqsex1os0n@node4    | 10.255.0.2 - - [10/Dec/2019:09:53:19 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.2.zpkqsex1os0n@node4    | 10.255.0.2 - - [10/Dec/2019:09:53:30 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+
+
+[node1] (local) root@192.168.0.13 ~/example-voting-app/result
+$ docker service logs --tail 5 --raw --no-trunc vote_vote
+10.255.0.2 - - [10/Dec/2019:09:47:18 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+10.255.0.2 - - [10/Dec/2019:09:47:19 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+10.255.0.2 - - [10/Dec/2019:09:47:30 +0000] "GET / HTTP/1.1" 200 1285 "-" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+10.255.0.2 - - [10/Dec/2019:09:53:19 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+10.255.0.2 - - [10/Dec/2019:09:53:30 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+10.255.0.2 - - [10/Dec/2019:09:47:19 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+10.255.0.2 - - [10/Dec/2019:09:47:19 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+10.255.0.2 - - [10/Dec/2019:09:53:14 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+10.255.0.2 - - [10/Dec/2019:09:53:23 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+10.255.0.2 - - [10/Dec/2019:09:53:35 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+[node1] (local) root@192.168.0.13 ~/example-voting-app/result
+
+$ docker service logs vote_vote 2>&1 | grep -i "09:47:18"
+vote_vote.1.geerqhy4e4kb@node3    | 10.255.0.2 - - [10/Dec/2019:09:47:18 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
+vote_vote.2.zpkqsex1os0n@node4    | 10.255.0.2 - - [10/Dec/2019:09:47:18 +0000] "POST / HTTP/1.1" 200 1688 "http://ip172-18-0-34-bnnl9g8t969000bjuqk0-5000.direct.labs.play-with-docker.com/" "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"
